@@ -76,7 +76,7 @@ function compute_isogeny(p,l)
   "4.time_non_null_point.",Time(time_non_nullpt_A);
   //-----------------------------
   return lv4tnp_cd,lv4tnp_imgx;
-end function;_
+end function;
 
 
 //===================

@@ -472,7 +472,7 @@ function image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_e2,t
   time_lincom_ip:=Time();
   //construct linear combination of x,e_1,e_2.
   lin_com:=lincom_xe1e2(lincom_e1e2,lv4tnp,l,max_coff_x,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
-  "Lin_com time for each pt.",Time(time_lincom_ip);
+  //"Lin_com time for each pt.",Time(time_lincom_ip);
 
   Xpt:=AssociativeArray();
   for t in index_t do  //t=(t_1,..,t_r).

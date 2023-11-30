@@ -14,25 +14,6 @@ you compile the following order.
 //Start of setting3.m
 //global setting and precomputation.
 
-assert(IsPrime(p));
-//assert((p mod 4) eq 3);
-
-//--------------------------------------------
-
-
-//take 8th root of 1.
-_<x>:=PolynomialRing(GF(p));
-assert(#RootsInSplittingField(x^8-1) eq 8);
-for i in {1..8} do
-  cand_zeta_8:=RootsInSplittingField(x^8-1)[i][1];
-  if cand_zeta_8^4 eq -1 then
-    zeta_8:=cand_zeta_8;
-    break i;
-  end if;
-end for;
-assert(zeta_8^4 eq -1);
-
-
 
 
 //---------------------------------------------
@@ -308,10 +289,6 @@ function inverse_element(lv4tc)
 end function;
 
 
-    
-
-
-
 
 //-----------------------
 
@@ -331,9 +308,28 @@ end function;
 
 
 
+function get_characteristic(tc)
+  for key in Keys(tc) do
+    if IsFinite(Parent(tc[key])) then
+      p:=Characteristic(Parent(tc[key]));
+      break key;
+    end if;
+  end for;
+  return p;
+end function;
+
+
+
+
+
+
+
+
+
 //take base field of theta cordinate.
 function global_field(tc)
   index_set:={};
+  p:=get_characteristic(tc);
   for key in Keys(tc) do
     if IsFinite(Parent(tc[key])) then
       index:=1;
@@ -343,8 +339,9 @@ function global_field(tc)
       index_set join:={index};
     end if;
   end for;
+  
   if (#index_set eq 0) then
-    q:=p;
+    assert(false);
   else 
     q:=p^LCM(index_set);
   end if;
@@ -360,6 +357,7 @@ end function;
 //take base field of sequence of theta cordinates.
 function global_field_of_seq(tc_seq)
   pow_set:={};
+  p:=get_characteristic(tc_seq[1]);
   for index in {1..(#tc_seq)} do
     for key in Keys(tc_seq[index]) do
       if IsFinite(Parent(tc_seq[index][key])) then
@@ -934,6 +932,26 @@ function minus_lv4tc(lv4tc)
   end for;
   return m_lv4tc;
 end function;
+
+
+//----------------------------------
+
+//construct all Rimeann positions in g=1.
+RP_dim1:={};
+for ijklm in CartesianPower({0,1,2,3},5) do
+  i:=ijklm[1];
+  j:=ijklm[2];
+  k:=ijklm[3];
+  l:=ijklm[4];
+  m:=ijklm[5];
+  if (i+j+k+l-2*m mod 4) eq 0 then
+    i_d:=(m-i) mod 4;
+    j_d:=(m-j) mod 4;
+    k_d:=(m-k) mod 4;
+    l_d:=(m-l) mod 4;
+    RP_dim1 join:={[i,j,k,l,i_d,j_d,k_d,l_d]};
+  end if;
+end for;
 
 
 

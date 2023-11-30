@@ -1,5 +1,3 @@
-//これはあまり書き換えるな!!
-
 //WLOG, we assume N_A>N_B.
 //Over F_(p^4), we use Alice's model of elliptic curve in P^2.
 
@@ -7,8 +5,26 @@
 //---------------
 
 
+assert(IsPrime(p));
+assert((p mod 4) eq 3);
+
+
+//take 8th root of 1.
+_<x>:=PolynomialRing(GF(p));
+assert(#RootsInSplittingField(x^8-1) eq 8);
+for i in {1..8} do
+  cand_zeta_8:=RootsInSplittingField(x^8-1)[i][1];
+  if cand_zeta_8^4 eq -1 then
+    zeta_8:=cand_zeta_8;
+    break i;
+  end if;
+end for;
+assert(zeta_8^4 eq -1);
+
+
 K:=GF(p);
 _<t>:=PolynomialRing(GF(p^4));
+
 
 /*parametor setting.===========================
 
@@ -19,10 +35,6 @@ N_B: Order of torsion.
 we assume N_A is odd.*/
 
 
-/*
-N_A:=3^3*5; 
-N_B:=2^4;   
-*/
 
 assert(N_A gt N_B); 
 assert(IsOdd(N_A));
@@ -40,8 +52,6 @@ for l in Prime_Fac_N_A do
   precomp_for_N_A[l]["index_t"]:=index_t;
   precomp_for_N_A[l]["index_j"]:=index_j;
  end for;
-
-
 //================================
 
 
@@ -102,7 +112,7 @@ alpha_Q_A:=alpha_0(Q_A);
 //==============================================
 
 
-atk_gen:=main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A);
+atk_gen:=main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A,zeta_8);
 
 
 Atk_Ker_phB:={k*E_0_4!atk_gen:k in {0..N_B}};  //Attacker.

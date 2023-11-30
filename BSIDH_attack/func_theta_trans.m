@@ -71,26 +71,26 @@ end function;
 
 
 
-//construct matrix moving 0-valued pt to [1,1,1,1].
-TP:=AssociativeArray();
-for key in even_lv22keys do
-  a1:=key[1];
-  a2:=key[2];
-  b1:=key[3];
-  b2:=key[4];
-  if key ne [1,1,1,1] then
-    TP[key]:=Matrix(IntegerRing(),4,4,[[1,0,b1,0],
-    [0,1,0,b2],[a1,0,1,0],[0,a2,0,1]]);
-    assert(Is_symplectic_g2(mat_to_set(TP[key])));
-  end if;
-end for;
-TP[[1,1,1,1]]:=Matrix(IntegerRing(),4,4,[0,1,0,1, 1,0,1,0, 1,0,1,1, 0,1,1,1]);
-assert(Is_symplectic_g2(mat_to_set(TP[[1,1,1,1]])));
 
 
 
+function to_splitting_theta(lv4tnp,lv4tc_1,lv4tc_2,zeta_8)
+  //construct matrix moving 0-valued pt to [1,1,1,1].
+  TP:=AssociativeArray();
+  for key in even_lv22keys do
+    a1:=key[1];
+    a2:=key[2];
+    b1:=key[3];
+    b2:=key[4];
+    if key ne [1,1,1,1] then
+      TP[key]:=Matrix(IntegerRing(),4,4,[[1,0,b1,0],
+      [0,1,0,b2],[a1,0,1,0],[0,a2,0,1]]);
+      assert(Is_symplectic_g2(mat_to_set(TP[key])));
+    end if;
+  end for;
+  TP[[1,1,1,1]]:=Matrix(IntegerRing(),4,4,[0,1,0,1, 1,0,1,0, 1,0,1,1, 0,1,1,1]);
+  assert(Is_symplectic_g2(mat_to_set(TP[[1,1,1,1]])));
 
-function to_splitting_theta(lv4tnp,lv4tc_1,lv4tc_2)
   lv22tnp:=to_lv22(lv4tnp);
   assert(Is_prod_ell(to_lv4(lv22tnp))); //base PPAV is elliptic product.
   set_zero_even:={key:key in even_lv22keys|lv22tnp[key] eq 0};

@@ -164,24 +164,6 @@ end function;
 
 
 
-//construct all Rimeann positions in g=1.
-RP_dim1:={};
-for ijklm in CartesianPower({0,1,2,3},5) do
-  i:=ijklm[1];
-  j:=ijklm[2];
-  k:=ijklm[3];
-  l:=ijklm[4];
-  m:=ijklm[5];
-  if (i+j+k+l-2*m mod 4) eq 0 then
-    i_d:=(m-i) mod 4;
-    j_d:=(m-j) mod 4;
-    k_d:=(m-k) mod 4;
-    l_d:=(m-l) mod 4;
-    RP_dim1 join:={[i,j,k,l,i_d,j_d,k_d,l_d]};
-  end if;
-end for;
-
-
 
 function term_dim1(chi,i,j,lv4tc_dim1_1,lv4tc_dim1_2)
   sum:=0;
@@ -325,7 +307,7 @@ function kMab_4mult(M,a,b)
   gamma:=M[3];
   delta:=M[4];
   return (delta*a-gamma*b)*(-beta*a+alpha*b+2*alpha*beta)-a*b;
- end function;
+end function;
 
 
 
@@ -429,20 +411,21 @@ end function;
 
 
 
-R:=5;
-assert(R ge 0);
-mat_22_det1:={};
-for alpha,delta in {2*k+1:k in {-R..R}} do
-  for beta,gamma in {2*k:k in {-R..R}} do
-    if alpha*delta-beta*gamma eq 1 then
-      M:=[alpha,beta,gamma,delta];
-      mat_22_det1 join:={M};
-    end if;
-  end for;
-end for;
-
 
 function theta_trans_same4pow_precomp(lv22tnp_1,lv22tnp_2,zeta_8)
+
+  R:=5;
+  assert(R ge 0);
+  mat_22_det1:={};
+  for alpha,delta in {2*k+1:k in {-R..R}} do
+    for beta,gamma in {2*k:k in {-R..R}} do
+      if alpha*delta-beta*gamma eq 1 then
+        M:=[alpha,beta,gamma,delta];
+        mat_22_det1 join:={M};
+      end if;
+    end for;
+  end for;
+
   for M in mat_22_det1 do
     tr_lv22tnp_1:=theta_transform_dim1(lv22tnp_1,M,zeta_8);
     if eq_tc_dim1(tr_lv22tnp_1,lv22tnp_2) then
@@ -456,6 +439,18 @@ end function;
 
 
 function theta_trans_same4pow_precomp_2(lv22tnp_1,lv22tnp_2,zeta_8)
+  R:=5;
+  assert(R ge 0);
+  mat_22_det1:={};
+  for alpha,delta in {2*k+1:k in {-R..R}} do
+    for beta,gamma in {2*k:k in {-R..R}} do
+      if alpha*delta-beta*gamma eq 1 then
+        M:=[alpha,beta,gamma,delta];
+        mat_22_det1 join:={M};
+      end if;
+    end for;
+  end for;
+
   good_M:={};
   for M in mat_22_det1 do
     tr_lv22tnp_1:=theta_transform_dim1(lv22tnp_1,M,zeta_8);
@@ -488,6 +483,7 @@ function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
   N:=Order(ker_gen);
   fact:=fatoriztion_seq(N);
   E_m:=E;
+  p:=Characteristic(BaseField(E));
   _<t>:=PolynomialRing(GF(p^4));
   for i in {1..#fact} do
     if i ne #fact then
@@ -518,6 +514,7 @@ end function;
 function elliptic_isogeny_2ptker(E,N,ker_gen1,ker_gen2,P,Q)
   fact:=fatoriztion_seq(N);
   E_m:=E;
+  p:=Characteristic(BaseField(E));
   _<t>:=PolynomialRing(GF(p^4));
   for i in {1..#fact} do
     if i ne #fact then

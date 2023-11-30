@@ -29,7 +29,7 @@ end function;
 
 
 //get endmorphism of deg=M written by quaternion element.
-function FullRepInt_2(C)
+function FullRepInt_2(C,p)
   assert(C gt p);
   assert(p mod 4 eq 3);
   for i in {1..50000} do
@@ -62,6 +62,7 @@ end function;
 
 //return image of d-torsion basis for given rep_normal_basis.
 function image_by_repint_2(E,rep_int,P,Q,end_i)
+  p:=Characteristic(BaseField(E));
   _<x>:=PolynomialRing(GF(p^4));
   Em_4:=EllipticCurve(x^3-x);
   Ep_4:=EllipticCurve(x^3+x);
@@ -106,15 +107,7 @@ function image_by_repint_2(E,rep_int,P,Q,end_i)
   assert(hPp*2 eq Pp);
   assert(hQp*2 eq Qp);
 
-  //hPp;
-  //termP_3:=(end_i(hPp)+end_j(hPp));
-  //(end_i^2)(hPp) eq -hPp;
-  //"termP_3",termP_3;
-
   termP_3:=(end_i(hPp)+end_j(hPp));
-
-  //"termP_3",termP_3;
-
   termP_4:=(hPp+end_k(hPp));
   termQ_3:=(end_i(hQp)+end_j(hQp));
   termQ_4:=(hQp+end_k(hQp));
@@ -150,6 +143,7 @@ end function;
 function construct_auxiliary_img_5(E,N_A,N_B,P,Q)
   assert(Order(P)eq N_A);
   assert(Order(Q)eq N_A);
+  p:=Characteristic(BaseField(E));
   _<x>:=PolynomialRing(GF(p^4));
   Em_4:=EllipticCurve(x^3-x);
   assert(E eq Em_4);
@@ -180,7 +174,7 @@ function construct_auxiliary_img_5(E,N_A,N_B,P,Q)
   assert(end_i^2 eq NegationMap(E_p_4));
 
   for count in {1..30} do
-    gamma_repint:=FullRepInt_2(a*N_B);
+    gamma_repint:=FullRepInt_2(a*N_B,p);
     gamma_PdivNB,gamma_QdivNB:=image_by_repint_2(E,gamma_repint,PdivNB,QdivNB,end_i);
     assert(Scheme(gamma_PdivNB) eq E);
     assert(Scheme(gamma_QdivNB) eq E);
@@ -222,6 +216,7 @@ end function;
 function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Order(P)eq N_A);
   assert(Order(Q)eq N_A);
+  p:=Characteristic(BaseField(E));
   _<x>:=PolynomialRing(GF(p^4));
   Em_4:=EllipticCurve(x^3-x);
   assert(E eq Em_4);
@@ -244,6 +239,8 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Order(Q) eq N_A);
   assert(Order(PdivNB) eq N_A);
   assert(Order(QdivNB) eq N_A);
+
+  assert(a*N_B gt p);
 
   b:=1;
   if (a*N_B lt p) then
@@ -271,7 +268,7 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(end_i^2 eq NegationMap(E_p_4));
 
   for count in {1..30} do
-    gamma_repint:=FullRepInt_2(b*a*N_B);
+    gamma_repint:=FullRepInt_2(b*a*N_B,p);
     gamma_PdivNB,gamma_QdivNB:=image_by_repint_2(E,gamma_repint,PdivNB,QdivNB,end_i);
     assert(Scheme(gamma_PdivNB) eq E);
     assert(Scheme(gamma_QdivNB) eq E);
@@ -435,7 +432,7 @@ end function;
 
 
 //split to product of ellitpic curve E'*E and represent given points as points on E.
-function ell_spliting_2(lv4tnp,lv4tc_1,lv4tc_2,E)
+function ell_spliting_2(lv4tnp,lv4tc_1,lv4tc_2,E,zeta_8)
   lv22tnp:=lv4tc_to_lv22tc(lv4tnp);
   assert(lv22tnp[[1,1,1,1]]eq 0);
   lv22tc_1:=lv4tc_to_lv22tc(lv4tc_1);
@@ -505,6 +502,7 @@ end function;
 
 //this function is used the last part. 
 function correct_aut_2(E_dm,E_cd,N,P_0,Q_0,P_cd,Q_cd,fst_ker1,fst_ker2,scd_ker1,scd_ker2)
+  p:=Characteristic(BaseField(E_dm));
   _<t>:=PolynomialRing(GF(p^4));
   cand_ker:=[];
   cand_ker[1]:=fst_ker1;
@@ -531,6 +529,7 @@ end function;
 
 //this function is used the last part. 
 function Is_correct_cyclic_isogeny(E_dm,E_cd,N,P_0,Q_0,P_cd,Q_cd,ker_1,ker_2)
+  p:=Characteristic(BaseField(E_dm));
   _<t>:=PolynomialRing(GF(p^4));
   //saerch generator of cyclic kernel.
   if Order(ker_1) eq N then
@@ -590,7 +589,7 @@ end function;
 
 
 //aux alpha:E_0_4->E_pr.
-function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A)
+function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A,zeta_8)
   time_total:=Time();
   time_prepare:=Time();
   assert(N_A gt N_B);
@@ -874,11 +873,11 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   lv4tc_0S2_Y:=lv4tc_0S2_cd;
 
   //use theta transformation to split theta structure.
-  lv4tnp_Y,lv4tc_0S1_Y,lv4tc_0S2_Y:=to_splitting_theta(lv4tnp_Y,lv4tc_0S1_Y,lv4tc_0S2_Y);
+  lv4tnp_Y,lv4tc_0S1_Y,lv4tc_0S2_Y:=to_splitting_theta(lv4tnp_Y,lv4tc_0S1_Y,lv4tc_0S2_Y,zeta_8);
 
   //-----------------------------
 
-  E_0_img_S1,E_0_img_S2:=ell_spliting_2(lv4tnp_Y,lv4tc_0S1_Y,lv4tc_0S2_Y,E_0_4);
+  E_0_img_S1,E_0_img_S2:=ell_spliting_2(lv4tnp_Y,lv4tc_0S1_Y,lv4tc_0S2_Y,E_0_4,zeta_8);
 
   for iso_E_0_4 in Automorphisms(E_0_4) do
     ker_1:=iso_E_0_4(E_0_img_S1);

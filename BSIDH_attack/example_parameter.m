@@ -1,6 +1,4 @@
 
-
-
 function smooth(p,max_l)
   facseq_p:=fatoriztion_seq(p+1);
   facseq_m:=fatoriztion_seq(p-1);
@@ -69,12 +67,9 @@ procedure compute_prime(min_p,max_p,max_l)
 end procedure;
 
 
-
 compute_prime(10^6,2*10^6,30);
       
-
-
-
+//----------------------------------------
 
 p:=991;
 N_A:=3^2*5*11;
@@ -100,8 +95,6 @@ N_B:=136;
 p:=14951;
 N_A:=5^2*13*23;
 N_B:=168;
-
-
 
 
 p:=104959;

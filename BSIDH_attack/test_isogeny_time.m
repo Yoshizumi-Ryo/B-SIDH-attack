@@ -76,16 +76,16 @@ function compute_isogeny(p,l)
   "4.time_non_null_point.",Time(time_non_nullpt_A);
   //-----------------------------
   return lv4tnp_cd,lv4tnp_imgx;
-end function;
+end function;_
 
 
 //===================
 //example. 
 
-min_p:=10^5;
-max_p:=10^6;
-l:=11;
-
+min_p:=10^5; //pの最小値. 
+max_p:=10^6; //pの最大値. 
+l:=11;    //計算したい次数l. 
+ 
 //min_p以上1max_p以下の素数p(mod 4=3)でl|(p+1) or l|(p-1)となる最小のものを返します.
 p:=get_p_l(min_p,max_p,l);  //100343 
 
@@ -105,6 +105,6 @@ compute_isogeny(p,l);
 
 3.time_for_the_point   :xに依存する計算にかかった時間(秒)
 
-先日送ったpdfのtableにおいて, null ptは1, not-null ptは3を意味しています.
+先日送ったpdfのtableにおいて, null ptは上の時間1, not-null ptは時間3を意味しています.
 */
 

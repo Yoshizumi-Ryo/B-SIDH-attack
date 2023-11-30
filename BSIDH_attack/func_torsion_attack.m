@@ -71,8 +71,8 @@ function image_by_repint_2(E,rep_int,P,Q,end_i)
   Pp:=iso_mp(P);
   Qp:=iso_mp(Q);
   assert(end_i^2 eq NegationMap(Ep_4));  //-1=i^2.
-  //assert(end_i2^2 eq NegationMap(Ep_4));
-  end_j:=FrobeniusMap(Ep_4);
+  //end_j:=FrobeniusMap(Ep_4);
+  end_j:=map<Ep_4->Ep_4| pt :-> [pt[1]^p,pt[2]^p,pt[3]^p]>;
   end_k:=end_i*end_j;
   assert(#{end_i(R)+end_j(R):R in Points(TorsionSubgroupScheme(Ep_4,2))} eq 1);
   x:=rep_int[1];

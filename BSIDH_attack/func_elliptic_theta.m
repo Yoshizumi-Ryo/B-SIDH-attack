@@ -251,14 +251,15 @@ end function;
 
 //use this.
 function ell_to_torsion_basis_2(E,N)
-  sqrt_orderE:=IntegerRing()!Sqrt(#E);
+  _,sqrt_orderE:=IsSquare(#E);
+  assert(sqrt_orderE^2 eq #E);
   assert(IsDivisibleBy(sqrt_orderE,N));
   r:=sqrt_orderE div N;
   assert(#Generators(E) eq 2); 
   basis1:=Generators(E)[1];
   basis2:=Generators(E)[2];
-  assert(Order(basis1) eq Sqrt(#E));
-  assert(Order(basis2) eq Sqrt(#E));
+  assert(Order(basis1) eq sqrt_orderE);
+  assert(Order(basis2) eq sqrt_orderE);
   P:=r*basis1;
   Q:=r*basis2;
   assert(Order(P) eq N);

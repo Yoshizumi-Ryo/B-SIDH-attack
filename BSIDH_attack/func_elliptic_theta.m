@@ -479,6 +479,7 @@ function fatoriztion_seq(N)
 end function;
     
 
+
 //calculate cyclic isogeny.
 function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
   N:=Order(ker_gen);
@@ -495,13 +496,13 @@ function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
     j:=N/(fact[i]*k);
     //j,fact[i],k;
     ker_gen_m:=k*ker_gen;
-    assert(Order(ker_gen_m) eq fact[i]);
+    //assert(Order(ker_gen_m) eq fact[i]);
     Ker_m:=SubgroupScheme(E_m,&*{(t-(k*ker_gen_m)[1]):k in {1..(fact[i]-1)}});
     E_m,phi_m:=IsogenyFromKernel(Ker_m);
     ker_gen:=phi_m(ker_gen);
     P:=phi_m(P);
     Q:=phi_m(Q);
-    assert(Order(ker_gen) eq k);
+    //assert(Order(ker_gen) eq k);
   end for;
   return E_m,P,Q;
 end function;

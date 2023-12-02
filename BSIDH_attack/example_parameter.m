@@ -54,13 +54,14 @@ procedure compute_prime(min_p,max_p,max_l)
     if IsPrime(q) and (q mod 4 eq 3) then
       if smooth(q,max_l) then
         _,N_A,N_B:=smooth(q,max_l);
-        if not(IsDivisibleBy(N_A,4)) then
+        //if not(IsDivisibleBy(N_A,4)) then
           "prime",q,
           "N_A",fatoriztion_seq(N_A);
           N_B;
+          break q;
           //fatoriztion_seq(N_B);
           "";
-        end if;
+        //end if;
       end if;
     end if;
   end for;
@@ -68,6 +69,8 @@ end procedure;
 
 
 compute_prime(10^6,2*10^6,30);
+
+compute_prime(2^250,2^250+10^4,2^100);
       
 //----------------------------------------
 
@@ -109,3 +112,23 @@ N_B:=1216;
 p:=202546499;
 N_A:=7^2 * 11^2 * 19 * 29 * 31;
 N_B:=2^2 * 3 * 5^3 * 13^2 * 17;
+
+
+p:=0x76042798BBFB78AEBD02490BD2635DEC131ABFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+N_A:=3^(34)*11*17*19^2*53^2*97*107*109*131*137*197*199*227;
+N_B:=2^110*5*7^2;
+
+
+
+p:=2^32*5^21*7*11*163*1181*2389*5233*8353*10139*11939*22003*25391*41843*3726787*6548911-1;
+N_A:=3^56;
+N_B:=2^32*5^21*7*11;
+
+
+
+//------------------------
+Ilog2(p);
+assert(p mod 4 eq 3);
+assert(N_A gt N_B);
+assert((N_A-N_B)*N_B gt p);
+//-------------------------

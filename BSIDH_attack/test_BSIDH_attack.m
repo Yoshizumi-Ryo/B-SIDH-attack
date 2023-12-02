@@ -3,10 +3,18 @@
 
 //we consider theta structure given by Thomae formula for Legendre form y^2=x(x-1)(x-lmd).
 //---------------
-
+/*
+N_A: Degree of isogney using attack.
+N_B: Order of torsion.
+*/
 
 assert(IsPrime(p));
 assert((p mod 4) eq 3);
+assert(N_A gt N_B); 
+assert(IsOdd(N_A));
+assert(IsDivisibleBy(p+1,N_A) or IsDivisibleBy(p-1,N_A));
+assert(IsDivisibleBy(p+1,N_B) or IsDivisibleBy(p-1,N_B));
+assert((N_A-N_B)*N_B gt p); 
 
 
 //take 8th root of 1.
@@ -25,35 +33,28 @@ assert(zeta_8^4 eq -1);
 K:=GF(p);
 _<t>:=PolynomialRing(GF(p^4));
 
-
-/*parametor setting.===========================
-
-We assume N_A>N_B.
-Then, 
-N_A: Degree of isogney using attack.
-N_B: Order of torsion.
-we assume N_A is odd.*/
-
-
-
-assert(N_A gt N_B); 
-assert(IsOdd(N_A));
+//parametor setting.===========================
 
 
 Prime_Fac_N_A:=Seqset(fatoriztion_seq(N_A));
 precomp_for_N_A:=AssociativeArray();
 
 for l in Prime_Fac_N_A do
+  "precomputation for l=",l,"l(mod 4)=",(l mod 4);
   precomp_for_N_A[l]:=AssociativeArray();
   Mat_F:=const_Mat_F(l);
-  r,index_t,index_j:=const_index_t_j_2(l,Mat_F); //need.time
+  r,index_t,index_j:=const_index_t_j_3(l,Mat_F); //need.time
   precomp_for_N_A[l]["Mat_F"]:=Mat_F;
   precomp_for_N_A[l]["r"]:=r;
   precomp_for_N_A[l]["index_t"]:=index_t;
   precomp_for_N_A[l]["index_j"]:=index_j;
- end for;
-//================================
+end for;
+"precomp.fin.";
 
+
+
+
+//================================
 
 //public construction.==================
 
@@ -69,18 +70,19 @@ P_A,Q_A:=ell_to_torsion_basis_2(E_0_4,N_A);
 P_B,Q_B:=ell_to_torsion_basis_2(E_0_4,N_B);
 //========================================
 
-
 //Bob calculates secretly.==================
 
-coff_B:=Random({c: c in {0..(N_B-1)}});
+coff_B:=Random(0,(N_B-1));
 R_B:=E_0_4!(P_B+coff_B*Q_B);
 assert (Order(R_B) eq N_B);
 E_B,PA_EB,QA_EB:=elliptic_isogeny_1ptker(E_0_4,R_B,P_A,Q_A);
+
 assert(Order(PA_EB) eq N_A);
 assert(Order(QA_EB) eq N_A);
 
 //Note that the following data are public.
 //E_A,PB_EA,QB_EA,E_B,PA_EB,QA_EB;
+
 //===========================================
 
 
@@ -89,16 +91,14 @@ assert(Order(QA_EB) eq N_A);
 //construction auxiliary poinsts.================
 "attack start.";
 
-add_ct:=0;
-
 a:=N_A-N_B; 
 assert(a gt 0);
-
 
 
 //if a is not squre.
 E_pr,alpha_P_A,alpha_Q_A:=construct_auxiliary_img_6(E_0_4,N_A,N_B,P_A,Q_A);
 
+"construct_auxiliary_img_finish.";
 
 /*
 //if a is squre.

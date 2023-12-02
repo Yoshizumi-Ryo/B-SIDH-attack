@@ -303,6 +303,7 @@ function const_index_t_j_2(l,Mat_F)
   vec_tl:=Nullspace(Mat_Fl);
   set_vec_tl:={x:x in vec_tl};
   set_vec_t:={};
+  "CT1";
   for x in set_vec_tl do
     int_x:=[];
     for i in {1..r} do
@@ -310,10 +311,12 @@ function const_index_t_j_2(l,Mat_F)
     end for;
     set_vec_t join:={int_x};
   end for;
+  "CT2";
   assert(#set_vec_tl eq #set_vec_t);
-  
+  "CT3";
   index_t:={};
   for tt in CartesianPower(set_vec_t,2) do
+    tt;
     vec_t:=<[tt[1][i],tt[2][i]]:i in [1..r]>;
     /*
     for i in [1..r] do
@@ -322,11 +325,61 @@ function const_index_t_j_2(l,Mat_F)
     */
     index_t join:={vec_t};
   end for;
+  "CT4";
+  assert(#index_t eq #set_vec_t^2);
+  "CT5";
+
+   //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
+  inv_F:=l*Transpose(Mat_F);
+  index_j:=AssociativeArray();
+  "CT6";
+  for key in lv4keys do
+    index_j[key]:=[];
+    for j in {1..r} do
+      index_j[key][j]:=[(key[1]*inv_F[1][j])mod 4,(key[2]*inv_F[1][j])mod 4];
+    end for;
+  end for;
+  "CT7";
+
+  return r,index_t,index_j;
+end function;
+
+
+
+
+
+function const_index_t_j_3(l,Mat_F)
+  r:=NumberOfRows(Mat_F);
+  ZlZ:=quo<IntegerRing()|l>;
+  Mat_Fl:=ChangeRing(Mat_F,ZlZ);
+  vec_tl:=Nullspace(Mat_Fl);
+  set_vec_tl:={x:x in vec_tl};
+  set_vec_t:={};
+  for x in set_vec_tl do
+    int_x:=[];
+    for i in {1..r} do
+      int_x[i]:=IntegerRing()!(x[i]);
+    end for;
+    set_vec_t join:={int_x};
+  end for;
+  assert(#set_vec_tl eq #set_vec_t);
+  index_t:={};
+  if r eq 2 then
+    index_t:={<[tt[1][1],tt[2][1]],[tt[1][2],tt[2][2]]>:tt in CartesianPower(set_vec_t,2)};
+  end if;
+
+  "it takes time.";
+  if r eq 4 then
+    index_t:={<[tt1[1],tt2[1]],[tt1[2],tt2[2]],[tt1[3],tt2[3]],[tt1[4],tt2[4]]>:tt1,tt2 in set_vec_t};
+  end if;
+  "fin.";
+
   assert(#index_t eq #set_vec_t^2);
 
    //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
   inv_F:=l*Transpose(Mat_F);
   index_j:=AssociativeArray();
+  "CT6";
   for key in lv4keys do
     index_j[key]:=[];
     for j in {1..r} do

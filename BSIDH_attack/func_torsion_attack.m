@@ -2,18 +2,131 @@
 //start of torsion_attack6.m
 
 
-//-----------
-
-//------------
+//auxi. functions.----------------------------
 
 
 
-//auxi. funcs.
+//compute all x s.t. x^2=-1 (mod M), (0<x<M).
+function all_4throot_mod(M)
+  "Wait for calculating to get prime divisors of M=",M;
+  seq_pr_div_M:=PrimeDivisors(M);
+  "calculated.";
+  prime_factor:=Seqset(seq_pr_div_M);
+  assert(M ge 2);
+  if not forall{pr:pr in (prime_factor diff {2})|pr mod 4 eq 1} then
+    return {};
+  end if;
+  if IsDivisibleBy(M,4) then
+    return {};
+  end if;
+  fac_M:=Factorization(M);
+  CRT_M:=[];
+  for i in {1..#fac_M} do
+    CRT_M[i]:=fac_M[i][1]^fac_M[i][2];
+  end for;
+  X_M:=[];
+  for i in {1..#fac_M} do
+    X_M[i]:=Modsqrt(-1,CRT_M[i]);
+    assert(IsDivisibleBy(X_M[i]^2+1,CRT_M[i]));
+  end for;
+  set_all_4throot_modM:={};
+  for bit in CartesianPower({1,-1},#fac_M) do
+    Y_M:=[];
+    for i in {1..#fac_M} do
+      Y_M[i]:=(bit[i]*X_M[i]) mod CRT_M[i];
+      assert(IsDivisibleBy(Y_M[i]^2+1,CRT_M[i]));
+    end for;
+    set_all_4throot_modM join:={CRT(Y_M,CRT_M)};
+  end for;
+  return set_all_4throot_modM;
+end function;
+
+
+//全探索.
+function all_4throot_mod_2(M)
+  set:={};
+  for r in {1..M} do
+    if IsDivisibleBy(r^2+1,M) then
+      set join:={r};
+    end if;
+  end for;
+  return set;
+end function;
 
 
 
-//This is not Cornacchia Alg, but the same result. 
+//for given M, we find x,y s.t.x^2+y^2=M and GCD(x,y)=1.
+function primitive_Cornacchia(M)
+  if M eq 0 then
+    return true,0,0;
+  elif M eq 1 then
+    return true,1,0;
+  elif M eq 2 then
+    return true,1,1;
+  end if;
+  assert(M ge 2);
+  if #all_4throot_mod(M) ne 0 then
+    set_all_4throot_modM:=all_4throot_mod(M);
+    for r0 in set_all_4throot_modM do
+      if 2*r0 le M then
+        r_0:=r0;
+        assert((r_0^2+1) mod M eq 0);
+        rr:=[];
+        r_1:=(M mod r_0);
+        while r_1^2 ge M do
+          r_2:=r_0 mod r_1;
+          r_0:=r_1;
+          r_1:=r_2;
+        end while;
+        assert(r_1^2 lt M);
+        if IsSquare(M-r_1^2) then
+          _,s:=IsSquare(M-r_1^2);
+          assert(r_1^2+s^2 eq M);
+          assert(GCD(r_1,s) eq 1);
+          return true,r_1,s;
+        end if;
+      end if;
+    end for;
+  end if;
+  return false;
+end function;
+
+
+
+//for given M, we find x,y s.t.x^2+y^2=M.
 function Cornacchia(M)
+  if M eq 0 then
+    return true,0,0;
+  elif M eq 1 then
+    return true,1,0;
+  end if;
+  assert(M ge 2);
+  if primitive_Cornacchia(M) then
+    "CC2";
+    _,x,y:=primitive_Cornacchia(M);
+    assert(x^2+y^2 eq M);
+    return true,x,y;
+  end if;
+  for m in Divisors(M) do
+    if IsSquare(m) then
+      if primitive_Cornacchia(M div m) then
+        _,x,y:=primitive_Cornacchia(M div m);
+        _,sqrt_m:=IsSquare(m);
+        assert((sqrt_m*x)^2+(sqrt_m*y)^2 eq M);
+        return true,sqrt_m*x,sqrt_m*y;
+      end if;
+    end if;
+  end for;
+  return false;
+end function;
+
+
+
+//全探索.
+function Cornacchia_2(M)
+  if M eq 0 then
+    return true,0,0;
+  end if;
   for x in {1..(Isqrt(M)+1)} do
     ysq:=M-x^2;
     if IsSquare(ysq) then
@@ -23,7 +136,6 @@ function Cornacchia(M)
   end for;
   return false;
 end function;
-
 
 
 
@@ -224,7 +336,6 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Scheme(Q) eq Em_4);
   assert(N_A gt N_B);
   a:=N_A-N_B;
-
   ZmodN_A:=quo<IntegerRing()|N_A>;
   modN_B:=ZmodN_A!N_B;
   assert(GCD(N_A,N_B) eq 1);
@@ -239,50 +350,63 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Order(Q) eq N_A);
   assert(Order(PdivNB) eq N_A);
   assert(Order(QdivNB) eq N_A);
-
-  assert(a*N_B gt p);
+  //assert(a*N_B gt p);
 
   b:=1;
-  if (a*N_B lt p) then
+  if (a*N_B lt p) then //if a*N_B<p, we find b s.t. b*a*N_B>p.
     if IsDivisibleBy(p+1,N_B) then
       ppm:=p+1;
     else
       ppm:=p-1;
     end if;
+    assert(IsDivisibleBy(ppm,N_B));
 
     for NN_B in Divisors(ppm) do
       if (p lt a*NN_B) and IsDivisibleBy(NN_B,N_B) then
         bb:=NN_B div N_B;
         if GCD(N_A,bb) eq 1 and  GCD(a,bb) eq 1 then
-          b:=bb;
+          if  (bb*a*N_B gt p) then
+            b:=bb;
+            "we multply in aux path const.",b,"(In this case, we will make false)";
+          end if;
           break NN_B;
         end if;
       end if;
     end for;
   end if;
+  if b*a*N_B lt p then
+    "There is not appropriate b.";
+    assert(false);
+  end if;
+
   assert(b*a*N_B gt p);
-  
+  assert(GCD(a,b*N_B) eq 1);
+  assert(GCD(N_A,b*N_B) eq 1);
+  //assert(N_A gt b*N_B);
   _<x>:=PolynomialRing(GF(p^4));
   E_p_4:=EllipticCurve(x^3+x);
   end_i:=Automorphisms(E_p_4)[2];
   assert(end_i^2 eq NegationMap(E_p_4));
 
   for count in {1..30} do
+    "C1";
     gamma_repint:=FullRepInt_2(b*a*N_B,p);
+    "C2";
     gamma_PdivNB,gamma_QdivNB:=image_by_repint_2(E,gamma_repint,PdivNB,QdivNB,end_i);
+    "C3";
     assert(Scheme(gamma_PdivNB) eq E);
     assert(Scheme(gamma_QdivNB) eq E);
+    "C4";
     assert(Order(gamma_PdivNB) eq N_A);
     assert(Order(gamma_QdivNB) eq N_A);
     //"gamma(P/N_B)",gamma_PdivNB;
-
+    "C5";
     //construct basis of ker(dual_delta).------
     S_1,S_2:=ell_to_torsion_basis_2(E,b*N_B); 
     assert(Order(S_1) eq b*N_B);
     assert(Order(S_2) eq b*N_B);
     //basis of ker(dual delta).
     bkdd_1,bkdd_2:=image_by_repint_2(E,gamma_repint,S_1,S_2,end_i);
-
     if Order(bkdd_1) eq b*N_B then
       bkdd:=bkdd_1;
       break count;
@@ -295,10 +419,13 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
     end if;
   end for;
   assert(Order(bkdd) eq b*N_B);
+  "C10";
   
   Ecd,alpha_P,alpha_Q:=elliptic_isogeny_1ptker(E,bkdd,gamma_PdivNB,gamma_QdivNB);
+  "C11";
   assert(Order(P) eq Order(alpha_P));
   assert(Order(Q) eq Order(alpha_Q));
+  "C12";
   return Ecd,alpha_P,alpha_Q;
 end function;
 
@@ -600,8 +727,10 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   assert(alpha_P_A in E_pr);
   assert(alpha_Q_A in E_pr);
   lmd_0,lv22tnp_0,lv4tnp_0,E_0_4,j_0,isss_0:=E_to_lmd(E_0_4);
+  "wait for chaing elliptic curve to another isomorphic one.";
   lmd_B,lv22tnp_B,lv4tnp_B,E_B2,j_B,isss_B,iso_E_B_2:=E_to_lmd(E_B);
   lmd_pr,lv22tnp_pr,lv4tnp_pr,E_pr,j_pr,isss_pr,iso_E_pr:=E_to_lmd(E_pr);
+  "fin.";
   assert(isss_0);
   assert(isss_B);
   assert(isss_pr);
@@ -611,7 +740,9 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   //we will call e_1=[alpha(P_A),PA_EB], e_2=[alpha(Q_A),QA_EB].
   //Next we want to calculate  F(0,PA_EB)=(S_1,*), F(0,QA_EB)=(S_2,*), because Ker(phi_B)=<S_1,S_2>.
 
+  //"wait for taking basis of E_B_2[N_B].";
   S1,S2:=ell_to_torsion_basis_2(E_B2,N_B); //attacker will use.
+  //"fin.";
   //theta null pt of E_0*E_B.----------------
   lv4tnp_0B:=ell_prod_lv4tc(lv4tnp_pr,lv4tnp_B); 
   assert(Is_lv4tnp(lv4tnp_0B));
@@ -624,7 +755,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   lv4tc_f1_E0:=uvw_to_lv4tc(lmd_pr,lv22tnp_pr,f1_E0[1],f1_E0[2],f1_E0[3]);
   lv4tc_f1_EB:=uvw_to_lv4tc(lmd_B,lv22tnp_B,f1_EB[1],f1_EB[2],f1_EB[3]);
   lv4tc_f1:=ell_prod_lv4tc(lv4tc_f1_E0,lv4tc_f1_EB);
-  assert(IsOrder(lv4tnp_0B,lv4tc_f1,N_A));
+  //assert(IsOrder(lv4tnp_0B,lv4tc_f1,N_A));
 
   //f_2 in E_0*E_B.
   f2_E0:=iso_E_pr(alpha_Q_A);     //in E_0.
@@ -632,7 +763,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   lv4tc_f2_E0:=uvw_to_lv4tc(lmd_pr,lv22tnp_pr,f2_E0[1],f2_E0[2],f2_E0[3]);
   lv4tc_f2_EB:=uvw_to_lv4tc(lmd_B,lv22tnp_B,f2_EB[1],f2_EB[2],f2_EB[3]);
   lv4tc_f2:=ell_prod_lv4tc(lv4tc_f2_E0,lv4tc_f2_EB);
-  assert(IsOrder(lv4tnp_0B,lv4tc_f2,N_A));
+  //assert(IsOrder(lv4tnp_0B,lv4tc_f2,N_A));
 
   //f_1+f_2 in E_0*E_B.
   f12_E0:=f1_E0+f2_E0;
@@ -640,7 +771,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   lv4tc_f12_E0:=uvw_to_lv4tc(lmd_pr,lv22tnp_pr,f12_E0[1],f12_E0[2],f12_E0[3]);
   lv4tc_f12_EB:=uvw_to_lv4tc(lmd_B,lv22tnp_B,f12_EB[1],f12_EB[2],f12_EB[3]);
   lv4tc_f12:=ell_prod_lv4tc(lv4tc_f12_E0,lv4tc_f12_EB);
-  assert(IsOrder(lv4tnp_0B,lv4tc_f12,N_A));
+  //assert(IsOrder(lv4tnp_0B,lv4tc_f12,N_A));
   //linear combinataion of f_1,f_2.
 
   //----------------------------------------------
@@ -648,15 +779,16 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   //consider (0,S1),(0,S2) in E_0*E_B.
   //we need these images.
   //construct (0,S_1), (0,S_1)+f_1, (0,S_1)+f_2.
+  //"MT9";
   lv4tc_0S1,lv4tc_0S1pf1,lv4tc_0S1pf2,tc_0S1_lincomf1f2:=
   const_trp_x(lmd_pr,E_pr,lmd_B,E_B,lv4tnp_pr,lv22tnp_B,lv4tnp_0B,f1_E0,f1_EB,f2_E0,f2_EB,lv4tc_f1_E0,lv4tc_f2_E0,lv4tc_f1,lv4tc_f2,lv4tc_f12,S1);
-  assert(IsOrder(lv4tnp_0B,lv4tc_0S1,N_B));
+  //assert(IsOrder(lv4tnp_0B,lv4tc_0S1,N_B));
 
   //construct (0,S_2), (0,S_2)+f_1, (0,S_2)+f_2.
   lv4tc_0S2,lv4tc_0S2pf1,lv4tc_0S2pf2,tc_0S2_lincomf1f2:=
   const_trp_x(lmd_pr,E_pr,lmd_B,E_B,lv4tnp_pr,lv22tnp_B,lv4tnp_0B,f1_E0,f1_EB,f2_E0,f2_EB,lv4tc_f1_E0,lv4tc_f2_E0,lv4tc_f1,lv4tc_f2,lv4tc_f12,S2);
-  assert(IsOrder(lv4tnp_0B,lv4tc_0S2,N_B));
-
+  //assert(IsOrder(lv4tnp_0B,lv4tc_0S2,N_B));
+  //"MT10";
   //------------------
   lv4tnp_cd:=lv4tnp_0B;
 
@@ -674,6 +806,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
 
   "prepare time",Time(time_prepare);
   //=========================================
+
   fac:=fatoriztion_seq(N_A);
   "start isogeny";
   s:=1;
@@ -693,6 +826,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     "calculating degree. l=",l;
     "remaining degree.", fatoriztion_seq(kk);
 
+
     assert(s*l*kk eq N_A);
     "l(mod 4)=",(l mod 4);
 
@@ -706,29 +840,42 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     lv4tc_f2_dm:=lv4tc_f2_cd;
     lv4tc_f12_dm:=lv4tc_f12_cd;
 
+    //"wait for calculate on the domain.";
+    //"MT15";
     lincom_f1f2_dm:=AssociativeArray();
     lincom_f1f2_dm[[1,1]]:=lv4tc_f12_dm;
+    //"MT15.1";
     lincom_f1f2_dm[[kk,0]]:=mult2(lv4tnp_dm,kk,lv4tc_f1_dm);
+    ///"MT15.2";
     lincom_f1f2_dm[[(kk+1),0]]:=mult2(lv4tnp_dm,kk+1,lv4tc_f1_dm);
     lincom_f1f2_dm[[0,kk]]:=mult2(lv4tnp_dm,kk,lv4tc_f2_dm);
     lincom_f1f2_dm[[0,(kk+1)]]:=mult2(lv4tnp_dm,kk+1,lv4tc_f2_dm);
+    //"MT15.3";
     lincom_f1f2_dm[[kk,kk]]:=mult2(lv4tnp_dm,kk,lv4tc_f12_dm);
+    //"MT15.4";
     lincom_f1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_f1_dm,lv4tc_f12_dm);
+    //"MT15.5";
     lincom_f1f2_dm[[1,kk+1]]:=ThreePtLadder_plus(lv4tnp_dm,kk+1,lv4tc_f2_dm,lv4tc_f1_dm,lv4tc_f12_dm);
     lincom_f1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_f2_dm,lv4tc_f12_dm);
     lincom_f1f2_dm[[kk+1,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk+1,lv4tc_f1_dm,lv4tc_f2_dm,lv4tc_f12_dm);
+    //"MT15.6";
+    //"fin.";
+   
+    //"MT16";
 
-    assert(IsOrder(lv4tnp_dm,lv4tc_f1_dm,l*kk));
-    assert(IsOrder(lv4tnp_dm,lv4tc_f2_dm,l*kk));
-    assert(IsOrder(lv4tnp_dm,lv4tc_f12_dm,l*kk));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_f1_dm,l*kk));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_f2_dm,l*kk));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_f12_dm,l*kk));
 
     lv4tc_e1 :=lincom_f1f2_dm[[kk,0]];
     lv4tc_e2 :=lincom_f1f2_dm[[0,kk]];
     lv4tc_e12:=lincom_f1f2_dm[[kk,kk]];
 
-    assert(IsOrder(lv4tnp_dm,lv4tc_e1,l));
-    assert(IsOrder(lv4tnp_dm,lv4tc_e2,l));
-    assert(IsOrder(lv4tnp_dm,lv4tc_e12,l));
+    //"MT16.1";
+
+    //assert(IsOrder(lv4tnp_dm,lv4tc_e1,l));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_e2,l));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_e12,l));
 
     lv4tc_0S1_dm   :=lv4tc_0S1_cd;
     lv4tc_0S1pf1_dm:=lv4tc_0S1pf1_cd;
@@ -737,10 +884,11 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     lv4tc_0S2pf1_dm:=lv4tc_0S2pf1_cd;
     lv4tc_0S2pf2_dm:=lv4tc_0S2pf2_cd;
 
-    assert(IsOrder(lv4tnp_dm,lv4tc_0S1_dm,N_B));
-    assert(IsOrder(lv4tnp_dm,lv4tc_0S2_dm,N_B));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_0S1_dm,N_B));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_0S2_dm,N_B));
 
     //S1----------------------------------
+    //"MT17";
     tc_0S1_lincomf1f2_dm:=AssociativeArray();
     tc_0S1_lincomf1f2_dm[[0,0]]:=lv4tc_0S1_dm;
     tc_0S1_lincomf1f2_dm[[1,0]]:=lv4tc_0S1pf1_dm;
@@ -749,16 +897,20 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     tc_0S1_lincomf1f2_dm[[0,1]]:=lv4tc_0S1pf2_dm;
     tc_0S1_lincomf1f2_dm[[0,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S1_dm,lv4tc_0S1pf2_dm);
     tc_0S1_lincomf1f2_dm[[0,kk+1]]:=ThreePtLadder_plus(lv4tnp_dm,kk+1,lv4tc_f2_dm,lv4tc_0S1_dm,lv4tc_0S1pf2_dm);
+    //"MT17.1";
 
     lv4tc_0S1pf1pf2_dm:=calc_xpypz(lv4tnp_dm,
     lv4tc_0S1_dm,lv4tc_f1_dm,lv4tc_f2_dm,
     lv4tc_0S1pf1_dm,lv4tc_0S1pf2_dm,lv4tc_f12_dm);
+    //"MT17.2";
     tc_0S1_lincomf1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S1pf2_dm,lv4tc_0S1pf1pf2_dm);
     tc_0S1_lincomf1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S1pf1_dm,lv4tc_0S1pf1pf2_dm);
+    //"MT18";
 
     //----------------------------------
 
     //S2----------------------------------
+
     tc_0S2_lincomf1f2_dm:=AssociativeArray();
     tc_0S2_lincomf1f2_dm[[0,0]]:=lv4tc_0S2_dm;
     tc_0S2_lincomf1f2_dm[[1,0]]:=lv4tc_0S2pf1_dm;
@@ -767,13 +919,14 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     tc_0S2_lincomf1f2_dm[[0,1]]:=lv4tc_0S2pf2_dm;
     tc_0S2_lincomf1f2_dm[[0,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S2_dm,lv4tc_0S2pf2_dm);
     tc_0S2_lincomf1f2_dm[[0,kk+1]]:=ThreePtLadder_plus(lv4tnp_dm,kk+1,lv4tc_f2_dm,lv4tc_0S2_dm,lv4tc_0S2pf2_dm);
+    //"MT19";
 
     lv4tc_0S2pf1pf2_dm:=calc_xpypz(lv4tnp_dm,
     lv4tc_0S2_dm,lv4tc_f1_dm,lv4tc_f2_dm,
     lv4tc_0S2pf1_dm,lv4tc_0S2pf2_dm,lv4tc_f12_dm);
     tc_0S2_lincomf1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S2pf2_dm,lv4tc_0S2pf1pf2_dm);
     tc_0S2_lincomf1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S2pf1_dm,lv4tc_0S2pf1pf2_dm);
-
+    //"MT20";
     //----------------------------------
 
  
@@ -827,6 +980,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     data_lv4tc_dm[1]:=data_lv4tc_0S1;
     data_lv4tc_dm[2]:=data_lv4tc_0S2;
     //-----------------------
+    "MT21";
 
     "calculate time in the domain.", Time(time_domain);
 
@@ -837,6 +991,8 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     else
       lv4tnp_cd,lv4tc_f1_cd,lv4tc_f2_cd,lv4tc_f12_cd,data_lv4tc_cd:=component_of_composition_last(l,r,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,trp_lv4tc_f1_dm,trp_lv4tc_f2_dm,trp_lv4tc_f12_dm,data_lv4tc_dm);
     end if;
+
+    "MT22";
       
     "isogeny time.", Time(time_isogeny);
 

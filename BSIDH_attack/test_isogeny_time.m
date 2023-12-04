@@ -57,11 +57,11 @@ function compute_isogeny(p,l)
   //---------------------------
   time_nullpt:=Time();
   Mat_F:=const_Mat_F(l);
-  r,index_t,index_j:=const_index_t_j_2(l,Mat_F);
+  r,set_vec_t,index_j:=const_index_t_j_3(l,Mat_F);
 
   lv4tc_e2,lv4tc_e2,lv4tc_e12:=modify_basis(lv4tnp_dm,l,lv4tc_e1,lv4tc_e2,lv4tc_e12);
 
-  lv4tnp_cd:=lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
+  lv4tnp_cd:=lv4tnp_of_codomain(l,r,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
   "1.time_null_point.",Time(time_nullpt);
   //---------------------------
   
@@ -71,7 +71,7 @@ function compute_isogeny(p,l)
   lincom_e1e2:=linear_combination(lv4tnp_dm,l,lv4tc_e1,lv4tc_e2,lv4tc_e12); 
   "2.time_for_all_pts.",Time(time_non_nullpt_B);
   time_non_nullpt_C:=Time();
-  lv4tnp_imgx:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,lv4tc_x,lv4tc_xpe1,lv4tc_xpe2);
+  lv4tnp_imgx:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,lv4tc_x,lv4tc_xpe1,lv4tc_xpe2);
   "3.time_for_the_point",Time(time_non_nullpt_C);
   "4.time_non_null_point.",Time(time_non_nullpt_A);
   //-----------------------------

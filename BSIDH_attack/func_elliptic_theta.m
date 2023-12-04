@@ -487,6 +487,7 @@ function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
   E_m:=E;
   p:=Characteristic(BaseField(E));
   _<t>:=PolynomialRing(GF(p^4));
+  fact;
   for i in {1..#fact} do
     if i ne #fact then
       k:=&*[fact[j]: j in {(i+1)..#fact}];
@@ -498,12 +499,15 @@ function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
     ker_gen_m:=k*ker_gen;
     //assert(Order(ker_gen_m) eq fact[i]);
     Ker_m:=SubgroupScheme(E_m,&*{(t-(k*ker_gen_m)[1]):k in {1..(fact[i]-1)}});
+    "isogeny_calc_of_deg",fact[i];
     E_m,phi_m:=IsogenyFromKernel(Ker_m);
+    "fin";
     ker_gen:=phi_m(ker_gen);
     P:=phi_m(P);
     Q:=phi_m(Q);
     //assert(Order(ker_gen) eq k);
   end for;
+  "E4";
   return E_m,P,Q;
 end function;
 

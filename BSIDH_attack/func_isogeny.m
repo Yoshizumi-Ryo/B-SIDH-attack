@@ -262,98 +262,13 @@ end function;
 
 
 
-function const_index_t_j(l,Mat_F)
-  r:=NumberOfRows(Mat_F);
-  index_t:={};  //wanted.
-  vector_t:={[i_1,i_2]:i_1,i_2 in {0..(l-1)}};
-  for all_t in CartesianPower(vector_t,r) do
-    count:=0;
-    for j in {1..r} do //for the s_th column.
-      if ((&+[all_t[i][1]*Mat_F[i][j]: i in {1..r}]) mod l) eq 0 then
-        if ((&+[all_t[i][2]*Mat_F[i][j]: i in {1..r}]) mod l) eq 0 then
-        count:=count+1;
-        end if;
-      end if;
-    end for;
-    if count eq r then
-      index_t:=index_t join {all_t};
-    end if;
-  end for;
-
-  //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
-  inv_F:=l*Transpose(Mat_F);
-  index_j:=AssociativeArray();
-  for key in lv4keys do
-    index_j[key]:=[];
-    for j in {1..r} do
-      index_j[key][j]:=[(key[1]*inv_F[1][j])mod 4,(key[2]*inv_F[1][j])mod 4];
-    end for;
-  end for;
-
-  return r,index_t,index_j;
-end function;
-
-
-
-
-function const_index_t_j_2(l,Mat_F)
-  r:=NumberOfRows(Mat_F);
-  ZlZ:=quo<IntegerRing()|l>;
-  Mat_Fl:=ChangeRing(Mat_F,ZlZ);
-  vec_tl:=Nullspace(Mat_Fl);
-  set_vec_tl:={x:x in vec_tl};
-  set_vec_t:={};
-  "CT1";
-  for x in set_vec_tl do
-    int_x:=[];
-    for i in {1..r} do
-      int_x[i]:=IntegerRing()!(x[i]);
-    end for;
-    set_vec_t join:={int_x};
-  end for;
-  "CT2";
-  assert(#set_vec_tl eq #set_vec_t);
-  "CT3";
-  index_t:={};
-  for tt in CartesianPower(set_vec_t,2) do
-    tt;
-    vec_t:=<[tt[1][i],tt[2][i]]:i in [1..r]>;
-    /*
-    for i in [1..r] do
-      vec_t[i]:=[tt[1][i],tt[2][i]];
-    end for;
-    */
-    index_t join:={vec_t};
-  end for;
-  "CT4";
-  assert(#index_t eq #set_vec_t^2);
-  "CT5";
-
-   //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
-  inv_F:=l*Transpose(Mat_F);
-  index_j:=AssociativeArray();
-  "CT6";
-  for key in lv4keys do
-    index_j[key]:=[];
-    for j in {1..r} do
-      index_j[key][j]:=[(key[1]*inv_F[1][j])mod 4,(key[2]*inv_F[1][j])mod 4];
-    end for;
-  end for;
-  "CT7";
-
-  return r,index_t,index_j;
-end function;
-
-
-
-
-
 function const_index_t_j_3(l,Mat_F)
   r:=NumberOfRows(Mat_F);
   ZlZ:=quo<IntegerRing()|l>;
   Mat_Fl:=ChangeRing(Mat_F,ZlZ);
   vec_tl:=Nullspace(Mat_Fl);
   set_vec_tl:={x:x in vec_tl};
+
   set_vec_t:={};
   for x in set_vec_tl do
     int_x:=[];
@@ -363,6 +278,8 @@ function const_index_t_j_3(l,Mat_F)
     set_vec_t join:={int_x};
   end for;
   assert(#set_vec_tl eq #set_vec_t);
+
+  /*
   index_t:={};
   if r eq 2 then
     index_t:={<[tt[1][1],tt[2][1]],[tt[1][2],tt[2][2]]>:tt in CartesianPower(set_vec_t,2)};
@@ -373,8 +290,8 @@ function const_index_t_j_3(l,Mat_F)
     index_t:={<[tt1[1],tt2[1]],[tt1[2],tt2[2]],[tt1[3],tt2[3]],[tt1[4],tt2[4]]>:tt1,tt2 in set_vec_t};
   end if;
   "fin.";
-
   assert(#index_t eq #set_vec_t^2);
+  */
 
    //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
   inv_F:=l*Transpose(Mat_F);
@@ -387,7 +304,7 @@ function const_index_t_j_3(l,Mat_F)
     end for;
   end for;
 
-  return r,index_t,index_j;
+  return r,set_vec_t,index_j;
 end function;
 
 
@@ -472,7 +389,7 @@ end function;
 
 
 
-function lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2)
+function lv4tnp_of_codomain(l,r,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2)
   tnp_codomain:=AssociativeArray();  //lv4tnp of codomain.
  
   _,base_field:=global_field_of_seq([tc_e1,tc_e2,tc_e1pe2]);
@@ -480,8 +397,9 @@ function lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2)
 
   lin_com:=linear_combination(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2);
 
+  
   for key in lv4keys do
-    tnp_codomain[key]:=&+[&*[lin_com[t[j]][index_j[key][j]]:j in {1..r}]:t in index_t];
+    tnp_codomain[key]:=&+[&*[lin_com[[t1[j],t2[j]]][index_j[key][j]]:j in {1..r}]:t1,t2 in set_vec_t];
     tnp_codomain[key]:=(base_field)!(tnp_codomain[key]);
   end for;
   return tnp_codomain;
@@ -512,7 +430,7 @@ end function;
 
 
 
-function image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
+function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
   r:=NumberOfRows(Mat_F);
   max_coff_x:=Max({Mat_F[j][1]: j in {1..r}});
   img_lv4tc:=AssociativeArray();
@@ -528,14 +446,17 @@ function image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp,tc_e1,tc_e2,t
   //"Lin_com time for each pt.",Time(time_lincom_ip);
 
   Xpt:=AssociativeArray();
-  for t in index_t do  //t=(t_1,..,t_r).
-    Xpt[t]:=[];
-    for j in {1..r} do
-      Xpt[t][j]:=lin_com[[Mat_F[j][1],t[j][1],t[j][2]]]; //theta cordinate of X_j+t_j.
+  for t1 in set_vec_t do  //t=(t_1,..,t_r).
+    for t2 in set_vec_t do
+      Xpt[[t1,t2]]:=[];
+      for j in {1..r} do
+        Xpt[[t1,t2]][j]:=lin_com[[Mat_F[j][1],t1[j],t2[j]]]; //theta cordinate of X_j+t_j.
+      end for;
     end for;
   end for;
+
   for key in lv4keys do
-    img_lv4tc[key]:=&+[&*[Xpt[t][j][index_j[key][j]]:j in {1..r}]:t in index_t];
+    img_lv4tc[key]:=&+[&*[Xpt[[t1,t2]][j][index_j[key][j]]:j in {1..r}]:t1,t2 in set_vec_t];
   end for;
   return img_lv4tc;
 end function;

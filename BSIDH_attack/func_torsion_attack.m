@@ -8,9 +8,9 @@
 
 //compute all x s.t. x^2=-1 (mod M), (0<x<M).
 function all_4throot_mod(M)
-  "Wait for calculating to get prime divisors of M=",M;
+  //"Wait for calculating to get prime divisors of M=",M;
   seq_pr_div_M:=PrimeDivisors(M);
-  "calculated.";
+  //"calculated.";
   prime_factor:=Seqset(seq_pr_div_M);
   assert(M ge 2);
   if not forall{pr:pr in (prime_factor diff {2})|pr mod 4 eq 1} then
@@ -42,7 +42,7 @@ function all_4throot_mod(M)
 end function;
 
 
-//全探索.
+//全探索.使わない.
 function all_4throot_mod_2(M)
   set:={};
   for r in {1..M} do
@@ -102,7 +102,6 @@ function Cornacchia(M)
   end if;
   assert(M ge 2);
   if primitive_Cornacchia(M) then
-    "CC2";
     _,x,y:=primitive_Cornacchia(M);
     assert(x^2+y^2 eq M);
     return true,x,y;
@@ -122,7 +121,7 @@ end function;
 
 
 
-//全探索.
+//全探索.使わない.
 function Cornacchia_2(M)
   if M eq 0 then
     return true,0,0;
@@ -145,11 +144,16 @@ function FullRepInt_2(C,p)
   assert(C gt p);
   assert(p mod 4 eq 3);
   for i in {1..50000} do
+    "FR1";
+    "counter",i;
     cd:=Floor(Sqrt(4*C/p));  //m'
-    zd:=Random({-cd..cd});   //z'
+    zd:=Random(-cd,cd);   //z'
     cdd:=Floor(Sqrt((4*C/p)-zd^2)); //m"
-    td:=Random({-cdd..cdd});  //t'
+    td:=Random(-cdd,cdd);  //t'
     c:=4*C-p*(zd^2+td^2);  //M'
+    "FR2";
+    Cornacchia(c);
+    "FR3";
     if Cornacchia(c) then
       _,xd,yd:=Cornacchia(c);
       assert(xd^2+yd^2 eq c);
@@ -168,6 +172,34 @@ function FullRepInt_2(C,p)
   assert(false);
 end function;
 
+
+
+//get endmorphism of deg=M written by quaternion element.
+function times_FullRepInt_2(C,p,max_time)
+  assert(C gt p);
+  assert(p mod 4 eq 3);
+  for i in {1..max_time} do
+    cd:=Floor(Sqrt(4*C/p));  //m'
+    zd:=Random(-cd,cd);   //z'
+    cdd:=Floor(Sqrt((4*C/p)-zd^2)); //m"
+    td:=Random(-cdd,cdd);  //t'
+    c:=4*C-p*(zd^2+td^2);  //M'
+    if Cornacchia(c) then
+      _,xd,yd:=Cornacchia(c);
+      assert(xd^2+yd^2 eq c);
+      if ((xd-td) mod 2 eq 0) and ((yd-zd) mod 2 eq 0) then
+        x:=((xd-td) div 2);
+        y:=((yd-zd) div 2);
+        z:=zd;
+        t:=td;
+        deg:=((xd^2+yd^2+p*(zd^2+td^2)) div 4);
+        assert(deg eq C);
+        return "for-roop time",i;
+      end if;
+    end if;
+  end for;
+  return "we cannot find.";
+end function;
 
 
 
@@ -351,62 +383,69 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Order(PdivNB) eq N_A);
   assert(Order(QdivNB) eq N_A);
   //assert(a*N_B gt p);
+  "CA1";
 
   b:=1;
   if (a*N_B lt p) then //if a*N_B<p, we find b s.t. b*a*N_B>p.
     if IsDivisibleBy(p+1,N_B) then
-      ppm:=p+1;
+      pNB:=p+1;
     else
-      ppm:=p-1;
+      pNB:=p-1;
     end if;
-    assert(IsDivisibleBy(ppm,N_B));
-
-    for NN_B in Divisors(ppm) do
-      if (p lt a*NN_B) and IsDivisibleBy(NN_B,N_B) then
-        bb:=NN_B div N_B;
-        if GCD(N_A,bb) eq 1 and  GCD(a,bb) eq 1 then
-          if  (bb*a*N_B gt p) then
-            b:=bb;
-            "we multply in aux path const.",b,"(In this case, we will make false)";
-          end if;
-          break NN_B;
+    assert(IsDivisibleBy(pNB,N_B));
+    b:=pNB div N_B;
+    /*
+    b_max:=pNB div N_B;
+    "b_max",b_max;
+    Divb_max:=Divisors(b_max);
+    b_min:=Floor(p/(a*N_B));
+    for bb in Divb_max do
+      if bb gt b_min then
+        if (GCD(a,bb*N_B) eq 1) and (GCD(N_A,bb*N_B) eq 1) then
+          b:=bb;
+          assert(IsDivisibleBy(pNB,b*N_B));
+          break bb;
         end if;
       end if;
     end for;
+    */
   end if;
-  if b*a*N_B lt p then
-    "There is not appropriate b.";
-    assert(false);
-  end if;
+
+  "CA2";
+  "b",b;
 
   assert(b*a*N_B gt p);
   assert(GCD(a,b*N_B) eq 1);
   assert(GCD(N_A,b*N_B) eq 1);
+
   //assert(N_A gt b*N_B);
   _<x>:=PolynomialRing(GF(p^4));
   E_p_4:=EllipticCurve(x^3+x);
   end_i:=Automorphisms(E_p_4)[2];
   assert(end_i^2 eq NegationMap(E_p_4));
 
+  "CA3";
+
   for count in {1..30} do
-    "C1";
+    "FCA1";
     gamma_repint:=FullRepInt_2(b*a*N_B,p);
-    "C2";
+    "FCA2";
     gamma_PdivNB,gamma_QdivNB:=image_by_repint_2(E,gamma_repint,PdivNB,QdivNB,end_i);
-    "C3";
+    "FCA3";
     assert(Scheme(gamma_PdivNB) eq E);
     assert(Scheme(gamma_QdivNB) eq E);
-    "C4";
     assert(Order(gamma_PdivNB) eq N_A);
     assert(Order(gamma_QdivNB) eq N_A);
     //"gamma(P/N_B)",gamma_PdivNB;
-    "C5";
     //construct basis of ker(dual_delta).------
+    "FCA4";
     S_1,S_2:=ell_to_torsion_basis_2(E,b*N_B); 
     assert(Order(S_1) eq b*N_B);
     assert(Order(S_2) eq b*N_B);
     //basis of ker(dual delta).
+    "FCA5";
     bkdd_1,bkdd_2:=image_by_repint_2(E,gamma_repint,S_1,S_2,end_i);
+    "FCA6";
     if Order(bkdd_1) eq b*N_B then
       bkdd:=bkdd_1;
       break count;
@@ -414,15 +453,16 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
       bkdd:=bkdd_2;
       break count;
     end if;
+    "FCA7";
     if count eq 30 then
       assert(false);
     end if;
   end for;
+
   assert(Order(bkdd) eq b*N_B);
-  "C10";
-  
+  "calculate (p+1)-isogeny between elliptic curve.";
   Ecd,alpha_P,alpha_Q:=elliptic_isogeny_1ptker(E,bkdd,gamma_PdivNB,gamma_QdivNB);
-  "C11";
+  "fin";
   assert(Order(P) eq Order(alpha_P));
   assert(Order(Q) eq Order(alpha_Q));
   "C12";
@@ -436,7 +476,7 @@ end function;
 
 //calucalte images of isogeny whose kernel are e1,e2.
 function component_of_composition(
-  l,r,Mat_F,index_t,index_j,
+  l,r,Mat_F,set_vec_t,index_j,
   lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
   trp_lv4tc_f1,trp_lv4tc_f2,trp_lv4tc_f12,data_lv4tc)
 
@@ -450,13 +490,13 @@ function component_of_composition(
 
   //image of 0.
   time_img:=Time();
-  lv4tnp_cd:=lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
+  lv4tnp_cd:=lv4tnp_of_codomain(l,r,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
   assert(Is_lv4tnp(lv4tnp_cd));
   "img_null_pt_time",Time(time_img);
   
   //image of f1.
   time_img:=Time();
-  lv4tc_img_f1:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+  lv4tc_img_f1:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
   trp_lv4tc_f1["f"],trp_lv4tc_f1["f+e1"],trp_lv4tc_f1["f+e2"]);
 
   "img_non-null_pt_time",Time(time_img);
@@ -464,13 +504,13 @@ function component_of_composition(
 
   //image of f2.
   time_img:=Time();
-  lv4tc_img_f2:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+  lv4tc_img_f2:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
   trp_lv4tc_f2["f"],trp_lv4tc_f2["f+e1"],trp_lv4tc_f2["f+e2"]);
   //"img_f2_time",Time(time_img);
 
   //image of f1+f2(=:f12)
   time_img:=Time();
-  lv4tc_img_f12:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+  lv4tc_img_f12:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
   trp_lv4tc_f12["f"],trp_lv4tc_f12["f+e1"],trp_lv4tc_f12["f+e2"]);
   //"img_f12_time",Time(time_img);
 
@@ -485,19 +525,19 @@ function component_of_composition(
 
     //image of x.
     time_img:=Time();
-    data_lv4tc_img_x["x"]:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+    data_lv4tc_img_x["x"]:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
     trp_lv4tc_x["X"],trp_lv4tc_x["X+e1"],trp_lv4tc_x["X+e2"]);
     //"img_x_time",Time(time_img);
 
     //image of x+f1.
     time_img:=Time();
-    data_lv4tc_img_x["x+f1"]:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+    data_lv4tc_img_x["x+f1"]:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
     trp_lv4tc_xpf1["X"],trp_lv4tc_xpf1["X+e1"],trp_lv4tc_xpf1["X+e2"]);
     //"img_x+f1_time",Time(time_img);
 
     //image of x+f2.
     time_img:=Time();
-    data_lv4tc_img_x["x+f2"]:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+    data_lv4tc_img_x["x+f2"]:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
     trp_lv4tc_xpf2["X"],trp_lv4tc_xpf2["X+e1"],trp_lv4tc_xpf2["X+e2"]);
     //"img_x+f2_time",Time(time_img);
 
@@ -513,7 +553,7 @@ end function;
 
 //last step version.
 function component_of_composition_last(
-  l,r,Mat_F,index_t,index_j,
+  l,r,Mat_F,set_vec_t,index_j,
   lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
   trp_lv4tc_f1,trp_lv4tc_f2,trp_lv4tc_f12,data_lv4tc)
 
@@ -527,7 +567,7 @@ function component_of_composition_last(
 
   //image of 0.
   time_img:=Time();
-  lv4tnp_cd:=lv4tnp_of_codomain(l,r,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
+  lv4tnp_cd:=lv4tnp_of_codomain(l,r,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
   assert(Is_lv4tnp(lv4tnp_cd));
   "img_null_pt_time",Time(time_img);
   
@@ -540,7 +580,7 @@ function component_of_composition_last(
 
     //image of x.
     time_img:=Time();
-    data_lv4tc_img_x["x"]:=image_of_point(lincom_e1e2,l,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
+    data_lv4tc_img_x["x"]:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,
     trp_lv4tc_x["X"],trp_lv4tc_x["X+e1"],trp_lv4tc_x["X+e2"]);
 
     "img_non-null_pt_time",Time(time_img);
@@ -727,10 +767,11 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   assert(alpha_P_A in E_pr);
   assert(alpha_Q_A in E_pr);
   lmd_0,lv22tnp_0,lv4tnp_0,E_0_4,j_0,isss_0:=E_to_lmd(E_0_4);
-  "wait for chaing elliptic curve to another isomorphic one.";
+  "wait for chaing elliptic curve to another isomorphic one."; 
+  time_ell_change:=Time();
   lmd_B,lv22tnp_B,lv4tnp_B,E_B2,j_B,isss_B,iso_E_B_2:=E_to_lmd(E_B);
   lmd_pr,lv22tnp_pr,lv4tnp_pr,E_pr,j_pr,isss_pr,iso_E_pr:=E_to_lmd(E_pr);
-  "fin.";
+  "fin.",Time(time_ell_change);
   assert(isss_0);
   assert(isss_B);
   assert(isss_pr);
@@ -832,7 +873,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
 
     Mat_F:=precomp_for_N_A[l]["Mat_F"];
     r:=precomp_for_N_A[l]["r"];
-    index_t:=precomp_for_N_A[l]["index_t"];
+    set_vec_t:=precomp_for_N_A[l]["set_vec_t"];
     index_j:=precomp_for_N_A[l]["index_j"];
 
     lv4tnp_dm:=lv4tnp_cd;
@@ -840,7 +881,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     lv4tc_f2_dm:=lv4tc_f2_cd;
     lv4tc_f12_dm:=lv4tc_f12_cd;
 
-    //"wait for calculate on the domain.";
+    "wait for calculate on the domain.",time_A:=Time();
     //"MT15";
     lincom_f1f2_dm:=AssociativeArray();
     lincom_f1f2_dm[[1,1]]:=lv4tc_f12_dm;
@@ -858,8 +899,9 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     lincom_f1f2_dm[[1,kk+1]]:=ThreePtLadder_plus(lv4tnp_dm,kk+1,lv4tc_f2_dm,lv4tc_f1_dm,lv4tc_f12_dm);
     lincom_f1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_f2_dm,lv4tc_f12_dm);
     lincom_f1f2_dm[[kk+1,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk+1,lv4tc_f1_dm,lv4tc_f2_dm,lv4tc_f12_dm);
+
     //"MT15.6";
-    //"fin.";
+    "fin.",Time(time_A);
    
     //"MT16";
 
@@ -888,7 +930,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     //assert(IsOrder(lv4tnp_dm,lv4tc_0S2_dm,N_B));
 
     //S1----------------------------------
-    //"MT17";
+    "wait for calculate about S1.",time_S1:=Time(); 
     tc_0S1_lincomf1f2_dm:=AssociativeArray();
     tc_0S1_lincomf1f2_dm[[0,0]]:=lv4tc_0S1_dm;
     tc_0S1_lincomf1f2_dm[[1,0]]:=lv4tc_0S1pf1_dm;
@@ -906,11 +948,12 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     tc_0S1_lincomf1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S1pf2_dm,lv4tc_0S1pf1pf2_dm);
     tc_0S1_lincomf1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S1pf1_dm,lv4tc_0S1pf1pf2_dm);
     //"MT18";
+    "fin,",Time(time_S1);
 
     //----------------------------------
 
     //S2----------------------------------
-
+    "wait for calculate about S1.",time_S2:=Time(); 
     tc_0S2_lincomf1f2_dm:=AssociativeArray();
     tc_0S2_lincomf1f2_dm[[0,0]]:=lv4tc_0S2_dm;
     tc_0S2_lincomf1f2_dm[[1,0]]:=lv4tc_0S2pf1_dm;
@@ -927,6 +970,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     tc_0S2_lincomf1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S2pf2_dm,lv4tc_0S2pf1pf2_dm);
     tc_0S2_lincomf1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S2pf1_dm,lv4tc_0S2pf1pf2_dm);
     //"MT20";
+    "fin,",Time(time_S1);
     //----------------------------------
 
  
@@ -987,9 +1031,9 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     time_isogeny:=Time();
 
     if i ne #fac then
-      lv4tnp_cd,lv4tc_f1_cd,lv4tc_f2_cd,lv4tc_f12_cd,data_lv4tc_cd:=component_of_composition(l,r,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,trp_lv4tc_f1_dm,trp_lv4tc_f2_dm,trp_lv4tc_f12_dm,data_lv4tc_dm);
+      lv4tnp_cd,lv4tc_f1_cd,lv4tc_f2_cd,lv4tc_f12_cd,data_lv4tc_cd:=component_of_composition(l,r,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,trp_lv4tc_f1_dm,trp_lv4tc_f2_dm,trp_lv4tc_f12_dm,data_lv4tc_dm);
     else
-      lv4tnp_cd,lv4tc_f1_cd,lv4tc_f2_cd,lv4tc_f12_cd,data_lv4tc_cd:=component_of_composition_last(l,r,Mat_F,index_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,trp_lv4tc_f1_dm,trp_lv4tc_f2_dm,trp_lv4tc_f12_dm,data_lv4tc_dm);
+      lv4tnp_cd,lv4tc_f1_cd,lv4tc_f2_cd,lv4tc_f12_cd,data_lv4tc_cd:=component_of_composition_last(l,r,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,trp_lv4tc_f1_dm,trp_lv4tc_f2_dm,trp_lv4tc_f12_dm,data_lv4tc_dm);
     end if;
 
     "MT22";

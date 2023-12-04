@@ -14,7 +14,7 @@ assert(N_A gt N_B);
 assert(IsOdd(N_A));
 assert(IsDivisibleBy(p+1,N_A) or IsDivisibleBy(p-1,N_A));
 assert(IsDivisibleBy(p+1,N_B) or IsDivisibleBy(p-1,N_B));
-assert((N_A-N_B)*N_B gt p); 
+//assert((N_A-N_B)*N_B gt p); 
 
 
 //take 8th root of 1.
@@ -43,10 +43,10 @@ for l in Prime_Fac_N_A do
   "precomputation for l=",l,"l(mod 4)=",(l mod 4);
   precomp_for_N_A[l]:=AssociativeArray();
   Mat_F:=const_Mat_F(l);
-  r,index_t,index_j:=const_index_t_j_3(l,Mat_F); //need.time
+  r,set_vec_t,index_j:=const_index_t_j_3(l,Mat_F); //need.time
   precomp_for_N_A[l]["Mat_F"]:=Mat_F;
   precomp_for_N_A[l]["r"]:=r;
-  precomp_for_N_A[l]["index_t"]:=index_t;
+  precomp_for_N_A[l]["set_vec_t"]:=set_vec_t;
   precomp_for_N_A[l]["index_j"]:=index_j;
 end for;
 "precomp.fin.";
@@ -89,7 +89,7 @@ assert(Order(QA_EB) eq N_A);
 
 
 //construction auxiliary poinsts.================
-"attack start.";
+"From now, we construct auxiliary poinsts.";
 
 a:=N_A-N_B; 
 assert(a gt 0);
@@ -98,7 +98,7 @@ assert(a gt 0);
 //if a is not squre.
 E_pr,alpha_P_A,alpha_Q_A:=construct_auxiliary_img_6(E_0_4,N_A,N_B,P_A,Q_A);
 
-"construct_auxiliary_img_finish.";
+"construct_auxiliary_points_finish.";
 
 /*
 //if a is squre.

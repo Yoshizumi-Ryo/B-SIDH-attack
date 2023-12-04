@@ -70,6 +70,7 @@ function compute_isogeny(p,l)
   time_non_nullpt_B:=Time();
   lincom_e1e2:=linear_combination(lv4tnp_dm,l,lv4tc_e1,lv4tc_e2,lv4tc_e12); 
   "2.time_for_all_pts.",Time(time_non_nullpt_B);
+  
   time_non_nullpt_C:=Time();
   lv4tnp_imgx:=image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,lv4tc_x,lv4tc_xpe1,lv4tc_xpe2);
   "3.time_for_the_point",Time(time_non_nullpt_C);
@@ -78,6 +79,12 @@ function compute_isogeny(p,l)
   return lv4tnp_cd,lv4tnp_imgx;
 end function;
 
+RootsInSplittingField
+
+p:=18628989148679788872005065350440589045599;
+
+
+p:=826791736418446924644415105270960270928927659729776400179861442336062222833458285859;
 
 //===================
 //example. 

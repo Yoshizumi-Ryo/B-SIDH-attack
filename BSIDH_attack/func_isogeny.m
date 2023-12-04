@@ -296,7 +296,6 @@ function const_index_t_j_3(l,Mat_F)
    //inv_F is inverse matrix of Mat_F over Z/nZ. (n=4).
   inv_F:=l*Transpose(Mat_F);
   index_j:=AssociativeArray();
-  "CT6";
   for key in lv4keys do
     index_j[key]:=[];
     for j in {1..r} do
@@ -418,10 +417,14 @@ function compute_mu_new(lv4tnp,tc_e1,tc_e2,l,tc_x,tc_xpe1,tc_xpe2)
 
   Fil:=Parent(mu_1_lpow);
   Fil<y>:=PolynomialRing(Fil);
+  time_split:=Time();
   mu_j1:=RootsInSplittingField(y^l-mu_1_lpow)[1][1];
+  "take_splitting_field_1.",Time(time_split);
   Fil:=Parent(mu_2_lpow);
   Fil<y>:=PolynomialRing(Fil);
+  time_split:=Time();
   mu_j2:=RootsInSplittingField(y^l-mu_2_lpow)[1][1];
+  "take_splitting_field_2.",Time(time_split);
   return mu_j1,mu_j2;
 end function;
 
@@ -431,6 +434,8 @@ end function;
 
 
 function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
+
+  time_3_1:=Time();
   r:=NumberOfRows(Mat_F);
   max_coff_x:=Max({Mat_F[j][1]: j in {1..r}});
   img_lv4tc:=AssociativeArray();
@@ -439,12 +444,16 @@ function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2
     tc_xpe1[key] *:=mu_j1;
     tc_xpe2[key] *:=mu_j2;
   end for;
+  "3_1st_part",Time(time_3_1);
 
+  time_3_2:=Time();
   time_lincom_ip:=Time();
   //construct linear combination of x,e_1,e_2.
   lin_com:=lincom_xe1e2(lincom_e1e2,lv4tnp,l,max_coff_x,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
   //"Lin_com time for each pt.",Time(time_lincom_ip);
+  "3_2nd_part",Time(time_3_2);
 
+  time_3_3:=Time();
   Xpt:=AssociativeArray();
   for t1 in set_vec_t do  //t=(t_1,..,t_r).
     for t2 in set_vec_t do
@@ -454,10 +463,14 @@ function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2
       end for;
     end for;
   end for;
+  "3_3rd_part",Time(time_3_3);
 
+  time_3_4:=Time();
   for key in lv4keys do
     img_lv4tc[key]:=&+[&*[Xpt[[t1,t2]][j][index_j[key][j]]:j in {1..r}]:t1,t2 in set_vec_t];
   end for;
+  "3_4th_part",Time(time_3_4);
+
   return img_lv4tc;
 end function;
 

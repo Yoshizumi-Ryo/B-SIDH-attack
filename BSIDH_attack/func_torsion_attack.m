@@ -486,7 +486,8 @@ function component_of_composition(
 
   time_lincom:=Time();
   lincom_e1e2:=linear_combination(lv4tnp_dm,l,lv4tc_e1,lv4tc_e2,lv4tc_e12); 
-  "lin_com for all pts",Time(time_lincom);
+  "lin_com for all pts";
+  Time(time_lincom);
 
   //image of 0.
   time_img:=Time();
@@ -881,7 +882,8 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     lv4tc_f2_dm:=lv4tc_f2_cd;
     lv4tc_f12_dm:=lv4tc_f12_cd;
 
-    "wait for calculate on the domain.",time_A:=Time();
+    "wait for calculate on the domain.";
+    time_A:=Time();
     //"MT15";
     lincom_f1f2_dm:=AssociativeArray();
     lincom_f1f2_dm[[1,1]]:=lv4tc_f12_dm;
@@ -930,7 +932,8 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     //assert(IsOrder(lv4tnp_dm,lv4tc_0S2_dm,N_B));
 
     //S1----------------------------------
-    "wait for calculate about S1.",time_S1:=Time(); 
+    "wait for calculate about S1.";
+    time_S1:=Time(); 
     tc_0S1_lincomf1f2_dm:=AssociativeArray();
     tc_0S1_lincomf1f2_dm[[0,0]]:=lv4tc_0S1_dm;
     tc_0S1_lincomf1f2_dm[[1,0]]:=lv4tc_0S1pf1_dm;
@@ -953,7 +956,8 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     //----------------------------------
 
     //S2----------------------------------
-    "wait for calculate about S1.",time_S2:=Time(); 
+    "wait for calculate about S1.";
+    time_S2:=Time(); 
     tc_0S2_lincomf1f2_dm:=AssociativeArray();
     tc_0S2_lincomf1f2_dm[[0,0]]:=lv4tc_0S2_dm;
     tc_0S2_lincomf1f2_dm[[1,0]]:=lv4tc_0S2pf1_dm;

@@ -88,7 +88,7 @@ function primitive_Cornacchia(M)
       end if;
     end for;
   end if;
-  return false;
+  return false; //nothing such x,y.
 end function;
 
 
@@ -144,16 +144,12 @@ function FullRepInt_2(C,p)
   assert(C gt p);
   assert(p mod 4 eq 3);
   for i in {1..50000} do
-    "FR1";
-    "counter",i;
     cd:=Floor(Sqrt(4*C/p));  //m'
     zd:=Random(-cd,cd);   //z'
     cdd:=Floor(Sqrt((4*C/p)-zd^2)); //m"
     td:=Random(-cdd,cdd);  //t'
     c:=4*C-p*(zd^2+td^2);  //M'
-    "FR2";
     Cornacchia(c);
-    "FR3";
     if Cornacchia(c) then
       _,xd,yd:=Cornacchia(c);
       assert(xd^2+yd^2 eq c);
@@ -164,6 +160,7 @@ function FullRepInt_2(C,p)
         t:=td;
         deg:=((xd^2+yd^2+p*(zd^2+td^2)) div 4);
         assert(deg eq C);
+        "we needed the for-roop in FullRepInt",i,"times.";
         return [x,y,z,t]; //x+y*i+z*((i+j)/2)+t*((1+k)/2).
       end if;
     end if;
@@ -283,79 +280,6 @@ end function;
 
 
 //P,Q are basis of E[N_A].
-//only a*N_B>p.
-function construct_auxiliary_img_5(E,N_A,N_B,P,Q)
-  assert(Order(P)eq N_A);
-  assert(Order(Q)eq N_A);
-  p:=Characteristic(BaseField(E));
-  _<x>:=PolynomialRing(GF(p^4));
-  Em_4:=EllipticCurve(x^3-x);
-  assert(E eq Em_4);
-  assert(Scheme(P) eq Em_4);
-  assert(Scheme(Q) eq Em_4);
-  assert(N_A gt N_B);
-  a:=N_A-N_B;
-
-  ZmodN_A:=quo<IntegerRing()|N_A>;
-  modN_B:=ZmodN_A!N_B;
-  assert(GCD(N_A,N_B) eq 1);
-  inv_modN_B:=modN_B^(-1);
-  inv_N_B:=IntegerRing()!inv_modN_B;
-  assert(((N_B*inv_N_B) mod N_A)eq 1);
-  PdivNB:=inv_N_B*P; //P/N_B.
-  QdivNB:=inv_N_B*Q; //Q/N_B.
-  assert(N_B*PdivNB eq P);
-  assert(N_B*QdivNB eq Q);
-  assert(Order(P) eq N_A);
-  assert(Order(Q) eq N_A);
-  assert(Order(PdivNB) eq N_A);
-  assert(Order(QdivNB) eq N_A);
-  assert(a*N_B gt p);
-
-  _<x>:=PolynomialRing(GF(p^4));
-  E_p_4:=EllipticCurve(x^3+x);
-  end_i:=Automorphisms(E_p_4)[2];
-  assert(end_i^2 eq NegationMap(E_p_4));
-
-  for count in {1..30} do
-    gamma_repint:=FullRepInt_2(a*N_B,p);
-    gamma_PdivNB,gamma_QdivNB:=image_by_repint_2(E,gamma_repint,PdivNB,QdivNB,end_i);
-    assert(Scheme(gamma_PdivNB) eq E);
-    assert(Scheme(gamma_QdivNB) eq E);
-    assert(Order(gamma_PdivNB) eq N_A);
-    assert(Order(gamma_QdivNB) eq N_A);
-    //"gamma(P/N_B)",gamma_PdivNB;
-
-    //construct basis of ker(dual_delta).------
-    S_1,S_2:=ell_to_torsion_basis_2(E,N_B); 
-    assert(Order(S_1) eq N_B);
-    assert(Order(S_2) eq N_B);
-    //basis of ker(dual delta).
-    bkdd_1,bkdd_2:=image_by_repint_2(E,gamma_repint,S_1,S_2,end_i);
-
-    if Order(bkdd_1) eq N_B then
-      bkdd:=bkdd_1;
-      break count;
-    elif Order(bkdd_2) eq N_B then
-      bkdd:=bkdd_2;
-      break count;
-    end if;
-    if count eq 30 then
-      assert(false);
-    end if;
-  end for;
-  assert(Order(bkdd) eq N_B);
-  
-  Ecd,alpha_P,alpha_Q:=elliptic_isogeny_1ptker(E,bkdd,gamma_PdivNB,gamma_QdivNB);
-  assert(Order(P) eq Order(alpha_P));
-  assert(Order(Q) eq Order(alpha_Q));
-  return Ecd,alpha_P,alpha_Q;
-end function;
-
-
-
-
-//P,Q are basis of E[N_A].
 //not to only a*N_B>p.
 function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Order(P)eq N_A);
@@ -383,7 +307,6 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   assert(Order(PdivNB) eq N_A);
   assert(Order(QdivNB) eq N_A);
   //assert(a*N_B gt p);
-  "CA1";
 
   b:=1;
   if (a*N_B lt p) then //if a*N_B<p, we find b s.t. b*a*N_B>p.
@@ -410,10 +333,6 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
     end for;
     */
   end if;
-
-  "CA2";
-  "b",b;
-
   assert(b*a*N_B gt p);
   assert(GCD(a,b*N_B) eq 1);
   assert(GCD(N_A,b*N_B) eq 1);
@@ -423,29 +342,20 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
   E_p_4:=EllipticCurve(x^3+x);
   end_i:=Automorphisms(E_p_4)[2];
   assert(end_i^2 eq NegationMap(E_p_4));
-
-  "CA3";
-
   for count in {1..30} do
-    "FCA1";
     gamma_repint:=FullRepInt_2(b*a*N_B,p);
-    "FCA2";
     gamma_PdivNB,gamma_QdivNB:=image_by_repint_2(E,gamma_repint,PdivNB,QdivNB,end_i);
-    "FCA3";
     assert(Scheme(gamma_PdivNB) eq E);
     assert(Scheme(gamma_QdivNB) eq E);
     assert(Order(gamma_PdivNB) eq N_A);
     assert(Order(gamma_QdivNB) eq N_A);
     //"gamma(P/N_B)",gamma_PdivNB;
     //construct basis of ker(dual_delta).------
-    "FCA4";
     S_1,S_2:=ell_to_torsion_basis_2(E,b*N_B); 
     assert(Order(S_1) eq b*N_B);
     assert(Order(S_2) eq b*N_B);
     //basis of ker(dual delta).
-    "FCA5";
     bkdd_1,bkdd_2:=image_by_repint_2(E,gamma_repint,S_1,S_2,end_i);
-    "FCA6";
     if Order(bkdd_1) eq b*N_B then
       bkdd:=bkdd_1;
       break count;
@@ -453,19 +363,15 @@ function construct_auxiliary_img_6(E,N_A,N_B,P,Q)
       bkdd:=bkdd_2;
       break count;
     end if;
-    "FCA7";
     if count eq 30 then
       assert(false);
     end if;
   end for;
 
   assert(Order(bkdd) eq b*N_B);
-  "calculate (p+1)-isogeny between elliptic curve.";
   Ecd,alpha_P,alpha_Q:=elliptic_isogeny_1ptker(E,bkdd,gamma_PdivNB,gamma_QdivNB);
-  "fin";
   assert(Order(P) eq Order(alpha_P));
   assert(Order(Q) eq Order(alpha_Q));
-  "C12";
   return Ecd,alpha_P,alpha_Q;
 end function;
 
@@ -753,6 +659,15 @@ end function;
 
 
 
+function seq_to_invseq(seq)
+  inv_seq:=[];
+  for i in {1..#seq} do
+    inv_seq[i]:=seq[#seq-i+1];
+  end for;
+  return inv_seq;
+end function;
+
+
 
 
 
@@ -849,8 +764,8 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   "prepare time",Time(time_prepare);
   //=========================================
 
-  fac:=fatoriztion_seq(N_A);
-  "start isogeny";
+  fac:=seq_to_invseq(fatoriztion_seq(N_A));
+  "start isogeny-------------------------";
   s:=1;
   fac;
   "";
@@ -864,9 +779,9 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     //fatoriztion_seq(s),",l=",l,",",fatoriztion_seq(kk);
 
     //s,",l=",l,",",kk;
-    "calculated degree.", fatoriztion_seq(s);
-    "calculating degree. l=",l;
-    "remaining degree.", fatoriztion_seq(kk);
+    "we calculated degree.", seq_to_invseq(fatoriztion_seq(s));
+    "from now, we calculate degree. l=",l;
+    "we remain degree.", seq_to_invseq(fatoriztion_seq(kk));
 
 
     assert(s*l*kk eq N_A);
@@ -932,7 +847,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     //assert(IsOrder(lv4tnp_dm,lv4tc_0S2_dm,N_B));
 
     //S1----------------------------------
-    "wait for calculate about S1.";
+    //"wait for calculate about S1.";
     time_S1:=Time(); 
     tc_0S1_lincomf1f2_dm:=AssociativeArray();
     tc_0S1_lincomf1f2_dm[[0,0]]:=lv4tc_0S1_dm;
@@ -951,12 +866,12 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     tc_0S1_lincomf1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S1pf2_dm,lv4tc_0S1pf1pf2_dm);
     tc_0S1_lincomf1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S1pf1_dm,lv4tc_0S1pf1pf2_dm);
     //"MT18";
-    "fin,",Time(time_S1);
+    //"fin,",Time(time_S1);
 
     //----------------------------------
 
     //S2----------------------------------
-    "wait for calculate about S1.";
+    //"wait for calculate about S1.";
     time_S2:=Time(); 
     tc_0S2_lincomf1f2_dm:=AssociativeArray();
     tc_0S2_lincomf1f2_dm[[0,0]]:=lv4tc_0S2_dm;
@@ -974,7 +889,7 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     tc_0S2_lincomf1f2_dm[[kk,1]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S2pf2_dm,lv4tc_0S2pf1pf2_dm);
     tc_0S2_lincomf1f2_dm[[1,kk]]:=ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S2pf1_dm,lv4tc_0S2pf1pf2_dm);
     //"MT20";
-    "fin,",Time(time_S1);
+    //"fin,",Time(time_S1);
     //----------------------------------
 
  
@@ -1028,7 +943,6 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     data_lv4tc_dm[1]:=data_lv4tc_0S1;
     data_lv4tc_dm[2]:=data_lv4tc_0S2;
     //-----------------------
-    "MT21";
 
     "calculate time in the domain.", Time(time_domain);
 
@@ -1039,10 +953,8 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     else
       lv4tnp_cd,lv4tc_f1_cd,lv4tc_f2_cd,lv4tc_f12_cd,data_lv4tc_cd:=component_of_composition_last(l,r,Mat_F,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12,trp_lv4tc_f1_dm,trp_lv4tc_f2_dm,trp_lv4tc_f12_dm,data_lv4tc_dm);
     end if;
-
-    "MT22";
       
-    "isogeny time.", Time(time_isogeny);
+    "time_isogeny.", Time(time_isogeny);
 
     assert(Is_lv4tnp(lv4tnp_cd));
 
@@ -1062,7 +974,6 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     */
 
     s:=s*l;
-    "";
     "";
   end for;
 

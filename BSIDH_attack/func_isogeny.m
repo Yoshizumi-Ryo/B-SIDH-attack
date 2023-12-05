@@ -410,21 +410,50 @@ end function;
 
 
 
+
 function compute_mu_new(lv4tnp,tc_e1,tc_e2,l,tc_x,tc_xpe1,tc_xpe2)
   key:=[0,0];
-  mu_1_lpow:=tc_x[key]/(ThreePtLadder_plus(lv4tnp,l,tc_e1,tc_x,tc_xpe1)[key]);
-  mu_2_lpow:=tc_x[key]/(ThreePtLadder_plus(lv4tnp,l,tc_e2,tc_x,tc_xpe2)[key]);
+  mu_j1_lpow:=tc_x[key]/(ThreePtLadder_plus(lv4tnp,l,tc_e1,tc_x,tc_xpe1)[key]);
+  mu_j2_lpow:=tc_x[key]/(ThreePtLadder_plus(lv4tnp,l,tc_e2,tc_x,tc_xpe2)[key]);
 
-  Fil:=Parent(mu_1_lpow);
-  Fil<y>:=PolynomialRing(Fil);
-  time_split:=Time();
-  mu_j1:=RootsInSplittingField(y^l-mu_1_lpow)[1][1];
-  "take_splitting_field_1.",Time(time_split);
-  Fil:=Parent(mu_2_lpow);
-  Fil<y>:=PolynomialRing(Fil);
-  time_split:=Time();
-  mu_j2:=RootsInSplittingField(y^l-mu_2_lpow)[1][1];
-  "take_splitting_field_2.",Time(time_split);
+  /*
+  time_1:=Time();
+  Fil:=Parent(mu_j1_lpow);
+  _<mu_j1>:=PolynomialRing(Fil);
+  if IsIrreducible(mu_j1^l-mu_j1_lpow) then
+    ext_fld:=ext<Fil|mu_j1^l-mu_j1_lpow>;
+    mu_j1:=ext_fld!mu_j1;
+  else 
+    mu_j1:=Root(mu_j1_lpow,l);
+  end if;
+  "time_get_l-sqrt_1",Time(time_1);
+
+  time_2:=Time();
+  Fil:=Parent(mu_j2_lpow);
+  _<mu_j2>:=PolynomialRing(Fil);
+  if IsIrreducible(mu_j2^l-mu_j2_lpow) then
+    ext_fld:=ext<Fil|mu_j2^l-mu_j2_lpow>;
+    mu_j2:=ext_fld!mu_j2;
+  else 
+    mu_j2:=Root(mu_j2_lpow,l);
+  end if;
+  "time_get_l-sqrt_2",Time(time_2);
+  */
+
+  time_1:=Time();
+  Fil:=Parent(mu_j1_lpow);
+  _<y>:=PolynomialRing(Fil);
+  mu_j1:=RootsInSplittingField(y^l-mu_j1_lpow)[1][1];
+  "take_splitting_field_1.",Time(time_1);
+  Fil,Parent(mu_j1);
+  "";
+  time_2:=Time();
+  Fil:=Parent(mu_j2_lpow);
+  _<y>:=PolynomialRing(Fil);
+  mu_j2:=RootsInSplittingField(y^l-mu_j2_lpow)[1][1];
+  "take_splitting_field_2.",Time(time_2);
+  Fil,Parent(mu_j2);
+
   return mu_j1,mu_j2;
 end function;
 
@@ -435,7 +464,6 @@ end function;
 
 function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
 
-  time_3_1:=Time();
   r:=NumberOfRows(Mat_F);
   max_coff_x:=Max({Mat_F[j][1]: j in {1..r}});
   img_lv4tc:=AssociativeArray();
@@ -444,16 +472,14 @@ function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2
     tc_xpe1[key] *:=mu_j1;
     tc_xpe2[key] *:=mu_j2;
   end for;
-  "3_1st_part",Time(time_3_1);
 
   time_3_2:=Time();
   time_lincom_ip:=Time();
   //construct linear combination of x,e_1,e_2.
   lin_com:=lincom_xe1e2(lincom_e1e2,lv4tnp,l,max_coff_x,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
   //"Lin_com time for each pt.",Time(time_lincom_ip);
-  "3_2nd_part",Time(time_3_2);
+  "time for calculating linear combination.",Time(time_3_2);
 
-  time_3_3:=Time();
   Xpt:=AssociativeArray();
   for t1 in set_vec_t do  //t=(t_1,..,t_r).
     for t2 in set_vec_t do
@@ -463,13 +489,10 @@ function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2
       end for;
     end for;
   end for;
-  "3_3rd_part",Time(time_3_3);
-
-  time_3_4:=Time();
+  
   for key in lv4keys do
     img_lv4tc[key]:=&+[&*[Xpt[[t1,t2]][j][index_j[key][j]]:j in {1..r}]:t1,t2 in set_vec_t];
   end for;
-  "3_4th_part",Time(time_3_4);
 
   return img_lv4tc;
 end function;

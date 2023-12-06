@@ -18,16 +18,23 @@ function get_p_l(min_p,max_p,l)
 end function;
 
 
-//calculate time of l-isogeny.
+
+
+//calculate time of l-isogeny of the point with order N. 
 function compute_isogeny(p,l)
   assert(IsPrime(l));
   assert(p mod 4 eq 3);
   assert((IsDivisibleBy(p+1,l)) or (IsDivisibleBy(p-1,l)));
   _<x>:=PolynomialRing(GF(p));
   E_0:=EllipticCurve(x^3-x);
+   
+  //div_set:=Seqset(Divisors(p+1)) join Seqset(Divisors(p-1));
+  //N:=Random({N:N in div_set|N gt 20});
+  
   P:=Random(E_0);
   Q:=Random(E_0);
-   _<x>:=PolynomialRing(GF(p^4));
+
+  _<x>:=PolynomialRing(GF(p^4));
   E_0_4:=EllipticCurve(x^3-x);
   P:=E_0_4!P;
   Q:=E_0_4!Q;
@@ -54,6 +61,7 @@ function compute_isogeny(p,l)
   lv4tc_xpe1:=ell_prod_lv4tc(lv4tc_PpS1,lv4tc_QpS1); //x+e1=(P+S1,Q+S1).
   lv4tc_xpe2:=ell_prod_lv4tc(lv4tc_PpS2,lv4tc_QpS2); //x+e2=(P+S2,Q+S2).
 
+  "CI3";
   //---------------------------
   time_nullpt:=Time();
   Mat_F:=const_Mat_F(l);
@@ -78,6 +86,7 @@ function compute_isogeny(p,l)
   //-----------------------------
   return lv4tnp_cd,lv4tnp_imgx;
 end function;
+
 
 
 //===================

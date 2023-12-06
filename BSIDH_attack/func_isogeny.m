@@ -308,6 +308,20 @@ end function;
 
 
 
+for l in {3..300} do
+  if (l mod 4) eq 3 then
+    if IsPrime(l) then
+      Mat_F:=const_Mat_F(l);
+      r,set_vec_t,_:=const_index_t_j_3(l,Mat_F);
+      #set_vec_t eq l^2;
+    end if;
+  end if;
+end for;
+
+
+
+
+
 //--------------------------------------------------
 
 
@@ -444,15 +458,19 @@ function compute_mu_new(lv4tnp,tc_e1,tc_e2,l,tc_x,tc_xpe1,tc_xpe2)
   Fil:=Parent(mu_j1_lpow);
   _<y>:=PolynomialRing(Fil);
   mu_j1:=RootsInSplittingField(y^l-mu_j1_lpow)[1][1];
-  "take_splitting_field_1.",Time(time_1);
-  Fil,Parent(mu_j1);
-  "";
+  if Degree(Parent(mu_j1),Fil) ne 1 then
+    "extension degree of taking l-sqrt.",Degree(Parent(mu_j1),Fil);
+    "take_splitting_field_1.",Time(time_1);
+  end if;
+
   time_2:=Time();
   Fil:=Parent(mu_j2_lpow);
   _<y>:=PolynomialRing(Fil);
   mu_j2:=RootsInSplittingField(y^l-mu_j2_lpow)[1][1];
-  "take_splitting_field_2.",Time(time_2);
-  Fil,Parent(mu_j2);
+  if Degree(Parent(mu_j2),Fil) ne 1 then
+    "extension degree of taking l-sqrt.",Degree(Parent(mu_j2),Fil);
+    "take_splitting_field_2.",Time(time_2);
+  end if;
 
   return mu_j1,mu_j2;
 end function;

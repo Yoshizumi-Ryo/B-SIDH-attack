@@ -11,9 +11,15 @@ load "func_torsion_attack.m";
 
 //input p,N_A,N_B here.
 
+p:=202546499;//27bit
+N_A:=7^2 * 11^2 * 19 * 29 * 31;
+N_B:=2^2 * 3 * 5^3 * 13^2 * 17;
+
+
 
 p:=991;//9bit
 N_A:=3^2*5*11;
 N_B:=2^5;
+
 
 load "test_BSIDH_attack.m"; 

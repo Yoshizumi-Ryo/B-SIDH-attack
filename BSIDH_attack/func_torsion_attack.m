@@ -121,7 +121,7 @@ end function;
 
 
 
-//全探索.使わない.
+//brute force. we dont use.
 function Cornacchia_2(M)
   if M eq 0 then
     return true,0,0;
@@ -149,7 +149,7 @@ function FullRepInt_2(C,p)
     cdd:=Floor(Sqrt((4*C/p)-zd^2)); //m"
     td:=Random(-cdd,cdd);  //t'
     c:=4*C-p*(zd^2+td^2);  //M'
-    Cornacchia(c);
+    //Cornacchia(c);
     if Cornacchia(c) then
       _,xd,yd:=Cornacchia(c);
       assert(xd^2+yd^2 eq c);
@@ -160,7 +160,7 @@ function FullRepInt_2(C,p)
         t:=td;
         deg:=((xd^2+yd^2+p*(zd^2+td^2)) div 4);
         assert(deg eq C);
-        "we needed the for-roop in FullRepInt",i,"times.";
+        "we needed the for-roop in FullRepInt:",i,"times.";
         return [x,y,z,t]; //x+y*i+z*((i+j)/2)+t*((1+k)/2).
       end if;
     end if;
@@ -392,8 +392,7 @@ function component_of_composition(
 
   time_lincom:=Time();
   lincom_e1e2:=linear_combination(lv4tnp_dm,l,lv4tc_e1,lv4tc_e2,lv4tc_e12); 
-  "lin_com for all pts";
-  Time(time_lincom);
+  "lin_com for all pts",Time(time_lincom);
 
   //image of 0.
   time_img:=Time();
@@ -658,7 +657,7 @@ function const_trp_x(lmd_0,E_0,lmd_B,E_B,lv4tnp_0,lv22tnp_B,lv4tnp_0B,f1_E0,f1_E
 end function;
 
 
-
+//from[a,b,c] to [c,b,a].
 function seq_to_invseq(seq)
   inv_seq:=[];
   for i in {1..#seq} do
@@ -668,6 +667,48 @@ function seq_to_invseq(seq)
 end function;
 
 
+
+
+
+function decomposition_to_seq(N)
+  seq:=fatoriztion_seq(N);
+  inv_seq:=[];
+  for i in {1..#seq} do
+    inv_seq[i]:=seq[#seq-i+1];
+  end for;
+  comp_seq:=[];
+  for i in {1..(#seq-1)} do
+    comp_seq[i]:=inv_seq[i+1];
+  end for;
+  comp_seq[#seq]:=inv_seq[1];
+  return comp_seq;
+end function;
+
+
+//for [a1,..,a_n], get [a1,..,ai].
+function cut_out_first(seq,i)
+  assert(i ge 0);
+  assert(i le #seq);
+  cut_seq:=[];
+  for j in {1..i} do
+    cut_seq[j]:=seq[j];
+  end for;
+  assert(#cut_seq eq i);
+  return cut_seq;
+end function;
+
+
+
+function cut_out_last(seq,i)
+  assert(i ge 0);
+  assert(i le #seq);
+  cut_seq:=[];
+  for j in {1..i} do
+    cut_seq[j]:=seq[j+(#seq-i)];
+  end for;
+  assert(#cut_seq eq i);
+  return cut_seq;
+end function;
 
 
 
@@ -764,25 +805,20 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
   "prepare time",Time(time_prepare);
   //=========================================
 
-  fac:=seq_to_invseq(fatoriztion_seq(N_A));
-  "start isogeny-------------------------";
-  s:=1;
+  "start attack isogeny-------------------------";
+  fac:=decomposition_to_seq(N_A); //the order of composition.
   fac;
-  "";
+  s:=1;
 
   for i in {1..#fac} do
+    "";
     time_domain:=Time();
-
     l:=fac[i];
     kk:=IntegerRing()!(N_A/(s*l));
 
-    //fatoriztion_seq(s),",l=",l,",",fatoriztion_seq(kk);
-
-    //s,",l=",l,",",kk;
-    "we calculated degree.", seq_to_invseq(fatoriztion_seq(s));
-    "from now, we calculate degree. l=",l;
-    "we remain degree.", seq_to_invseq(fatoriztion_seq(kk));
-
+    "we calculated degree.", cut_out_first(fac,(i-1));
+    "from now, we calculate degree l=",l;
+    "we remain degree.", cut_out_last(fac,(#fac-i));
 
     assert(s*l*kk eq N_A);
     "l(mod 4)=",(l mod 4);
@@ -974,13 +1010,12 @@ function main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_
     */
 
     s:=s*l;
-    "";
   end for;
-
-  "get codomain.";
+  "finish attack isogeny------------------------";
+  "";
+  
 
   time_after:=Time();
-
   lv4tnp_Y:=lv4tnp_cd;
   //"the number of zero theta",#{key:key in lv22keys|to_lv22(lv4tnp_Y)[key] eq 0};
   assert(Is_prod_ell(lv4tnp_Y));

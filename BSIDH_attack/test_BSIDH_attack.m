@@ -40,7 +40,7 @@ Prime_Fac_N_A:=Seqset(fatoriztion_seq(N_A));
 precomp_for_N_A:=AssociativeArray();
 
 for l in Prime_Fac_N_A do
-  "precomputation for l=",l,"l(mod 4)=",(l mod 4);
+  //"precomputation for l=",l,"l(mod 4)=",(l mod 4);
   precomp_for_N_A[l]:=AssociativeArray();
   Mat_F:=const_Mat_F(l);
   r,set_vec_t,index_j:=const_index_t_j_3(l,Mat_F); //need.time
@@ -114,12 +114,30 @@ alpha_Q_A:=alpha_0(Q_A);
 
 atk_gen:=main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A,zeta_8);
 
+"Attacker got generator of Ker(ph_B)";
 
+/*
+time_1:=Time();
+assert(E_0_4!(N_B*atk_gen) eq E_0_4!0);
+for m in PrimeDivisors(N_B) do
+  Ndivm:=N_B div m;
+  assert(E_0_4!(Ndivm*atk_gen) ne E_0_4!0);
+end for;
+"time_check_order_1",Time(time_1);
+*/
+
+time_2:=Time();
+assert(Order(atk_gen) eq N_B);
+"attck_result.",(WeilPairing(E_0_4!atk_gen,E_0_4!R_B,N_B) eq 1);
+"time_check_attack_result",Time(time_2);
+
+/*
+time_check:=Time();
 Atk_Ker_phB:={k*E_0_4!atk_gen:k in {0..N_B}};  //Attacker.
 Bob_Ker_phB:={k*E_0_4!R_B:k in {0..N_B}};      //Bob.
-"";
 "attack result.",Atk_Ker_phB eq Bob_Ker_phB;
-
+"time_is_attack_success.",Time(time_check);
+*/
 
 //--------------------
 

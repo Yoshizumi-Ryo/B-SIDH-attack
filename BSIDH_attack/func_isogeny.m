@@ -230,13 +230,16 @@ end function;
 function const_Mat_F(l)
   assert (IsPrime(l));
   assert (l ne 2);
-
   if (((l-3) mod 4) eq 0) then  //l=3 mod4.
     sum4sq:=sum_of_4sq(l);
     a1:=sum4sq[1];
     a2:=sum4sq[2];
     a3:=sum4sq[3];
     a4:=sum4sq[4];
+    assert(a1 ge 0);
+    assert(a2 ge 0);
+    assert(a3 ge 0);
+    assert(a4 ge 0);
     //l=a1^2+a2^2+a3^2+a4^2.
 
     Mat_F:=Matrix(IntegerRing(),4,4,[a1,-a2,-a3,-a4, a2,a1,a4,-a3, a3,-a4,a1,a2, a4,a3,-a2,a1]);
@@ -305,19 +308,6 @@ function const_index_t_j_3(l,Mat_F)
 
   return r,set_vec_t,index_j;
 end function;
-
-
-
-for l in {3..300} do
-  if (l mod 4) eq 3 then
-    if IsPrime(l) then
-      Mat_F:=const_Mat_F(l);
-      r,set_vec_t,_:=const_index_t_j_3(l,Mat_F);
-      #set_vec_t eq l^2;
-    end if;
-  end if;
-end for;
-
 
 
 
@@ -508,9 +498,11 @@ function image_of_point(lincom_e1e2,l,Mat_F,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2
     end for;
   end for;
   
+  time_3_4:=Time();
   for key in lv4keys do
     img_lv4tc[key]:=&+[&*[Xpt[[t1,t2]][j][index_j[key][j]]:j in {1..r}]:t1,t2 in set_vec_t];
   end for;
+  "time for calculate isogeny",Time(time_3_4);
 
   return img_lv4tc;
 end function;

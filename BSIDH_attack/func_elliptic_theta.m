@@ -251,6 +251,7 @@ end function;
 
 //use this.
 function ell_to_torsion_basis_2(E,N)
+  assert(IsSquare(#E));
   _,sqrt_orderE:=IsSquare(#E);
   assert(sqrt_orderE^2 eq #E);
   assert(IsDivisibleBy(sqrt_orderE,N));

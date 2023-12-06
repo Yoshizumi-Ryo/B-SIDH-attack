@@ -21,23 +21,32 @@ end function;
 
 
 //calculate time of l-isogeny of the point with order N. 
-function compute_isogeny(p,l)
+procedure compute_isogeny(p,l)
   assert(IsPrime(l));
   assert(p mod 4 eq 3);
   assert((IsDivisibleBy(p+1,l)) or (IsDivisibleBy(p-1,l)));
   _<x>:=PolynomialRing(GF(p));
   E_0:=EllipticCurve(x^3-x);
-   
-  //div_set:=Seqset(Divisors(p+1)) join Seqset(Divisors(p-1));
-  //N:=Random({N:N in div_set|N gt 20});
-  
-  P:=Random(E_0);
-  Q:=Random(E_0);
 
+  N:=1;
+  for NN in {1..15} do
+    if IsPrime(NN) then
+      if NN ne l then
+        N:=N*NN;
+      end if;
+    end if;
+  end for;
+  
   _<x>:=PolynomialRing(GF(p^4));
   E_0_4:=EllipticCurve(x^3-x);
-  P:=E_0_4!P;
-  Q:=E_0_4!Q;
+
+
+  "CI1";
+  N;
+  P,Q:=ell_to_torsion_basis_2(E_0_4,N);
+  "CI2";
+
+
   lmd_0,lv22tnp_0,lv4tnp_0,E_0_4,j_0,isss_0:=E_to_lmd(E_0_4);
   S1,S2:=ell_to_torsion_basis_2(E_0_4,l);
   S12:=S1+S2;
@@ -84,8 +93,7 @@ function compute_isogeny(p,l)
   "3.time_for_the_point",Time(time_non_nullpt_C);
   "4.time_non_null_point.",Time(time_non_nullpt_A);
   //-----------------------------
-  return lv4tnp_cd,lv4tnp_imgx;
-end function;
+end procedure;
 
 
 
@@ -97,6 +105,36 @@ p:=18628989148679788872005065350440589045599;
 p:=826791736418446924644415105270960270928927659729776400179861442336062222833458285859;
 
 //----------------------
+
+
+for l in {3..50} do
+  if IsPrime(l) then
+    l;
+    compute_isogeny(p,l);
+    "";
+  end if;
+end for;
+
+
+for l in {3..100} do
+  if IsPrime(l) then
+    Mat_F:=const_Mat_F(l);
+    if (l mod 4) eq 1 then
+      r:=2;
+    else
+      r:=4;
+    end if;
+    l;
+    Max({Mat_F[j][1]: j in {1..r}});
+    "";
+  end if;
+end for;
+
+
+
+
+
+
 
 min_p:=10^5; //pの最小値. 
 max_p:=10^6; //pの最大値. 

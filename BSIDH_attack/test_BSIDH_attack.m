@@ -33,9 +33,11 @@ assert(zeta_8^4 eq -1);
 K:=GF(p);
 _<t>:=PolynomialRing(GF(p^4));
 
+
+
+
+
 //parametor setting.===========================
-
-
 Prime_Fac_N_A:=Seqset(fatoriztion_seq(N_A));
 precomp_for_N_A:=AssociativeArray();
 
@@ -50,14 +52,14 @@ for l in Prime_Fac_N_A do
   precomp_for_N_A[l]["index_j"]:=index_j;
 end for;
 "precomp.fin.";
-
-
-
-
 //================================
 
-//public construction.==================
 
+
+
+
+
+//public construction.==================
 //E_0: y^2=x^3-x=x(x-1)(x+1).
 lmd_0:=K!(-1);
 _,lv22tnp_0,lv4tnp_0,E_0,j_0,isss_0:=lmd_to_lv22tnp(lmd_0);
@@ -70,8 +72,12 @@ P_A,Q_A:=ell_to_torsion_basis_2(E_0_4,N_A);
 P_B,Q_B:=ell_to_torsion_basis_2(E_0_4,N_B);
 //========================================
 
-//Bob calculates secretly.==================
 
+
+
+
+
+//Bob calculates secretly.==================
 coff_B:=Random(0,(N_B-1));
 R_B:=E_0_4!(P_B+coff_B*Q_B);
 assert (Order(R_B) eq N_B);
@@ -82,7 +88,6 @@ assert(Order(QA_EB) eq N_A);
 
 //Note that the following data are public.
 //E_A,PB_EA,QB_EA,E_B,PA_EB,QA_EB;
-
 //===========================================
 
 
@@ -90,18 +95,13 @@ assert(Order(QA_EB) eq N_A);
 
 //construction auxiliary poinsts.================
 "From now, we construct auxiliary poinsts.";
-
-a:=N_A-N_B; 
-assert(a gt 0);
-
-
-//if a is not squre.
+//if N_A-N_B is not squre.
 E_pr,alpha_P_A,alpha_Q_A:=construct_auxiliary_img_6(E_0_4,N_A,N_B,P_A,Q_A);
-
 "construct_auxiliary_points_finish.";
 
 /*
-//if a is squre.
+//if N_A-N_B is squre.
+a:=N_A-N_B;
 assert(IsSquare(a)); 
 b:=IntegerRing()!Sqrt(a);  
 alpha_0:=MultiplicationByMMap(E_0_4,b);  //4倍算 alpha_0:E_0->E_0.
@@ -112,11 +112,21 @@ alpha_Q_A:=alpha_0(Q_A);
 //==============================================
 
 
+
+
+
+
+//attack start===================================
 atk_gen:=main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A,zeta_8);
 
 "Attacker got generator of Ker(ph_B)";
 
-/*
+//time_2:=Time();
+assert(Order(atk_gen) eq N_B);
+"attck_result.",(WeilPairing(E_0_4!atk_gen,E_0_4!R_B,N_B) eq 1);
+//"time_check_attack_result",Time(time_2);
+
+/*-----------
 time_1:=Time();
 assert(E_0_4!(N_B*atk_gen) eq E_0_4!0);
 for m in PrimeDivisors(N_B) do
@@ -124,20 +134,11 @@ for m in PrimeDivisors(N_B) do
   assert(E_0_4!(Ndivm*atk_gen) ne E_0_4!0);
 end for;
 "time_check_order_1",Time(time_1);
-*/
-
-time_2:=Time();
-assert(Order(atk_gen) eq N_B);
-"attck_result.",(WeilPairing(E_0_4!atk_gen,E_0_4!R_B,N_B) eq 1);
-"time_check_attack_result",Time(time_2);
-
-/*
+//----------
 time_check:=Time();
 Atk_Ker_phB:={k*E_0_4!atk_gen:k in {0..N_B}};  //Attacker.
 Bob_Ker_phB:={k*E_0_4!R_B:k in {0..N_B}};      //Bob.
 "attack result.",Atk_Ker_phB eq Bob_Ker_phB;
 "time_is_attack_success.",Time(time_check);
 */
-
-//--------------------
-
+//==============================================

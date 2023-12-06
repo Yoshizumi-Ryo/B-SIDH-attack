@@ -566,10 +566,11 @@ end function;
 
 
 
-//使わない.
 //linear combination of x,e_1,e_2.
 function lincom_xe1e2(lincom_e1e2,lv4tnp,l,max_coff_x,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2)
+  time_0:=Time();
   x_lincom_e1e2:=x_plus_lincom(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2,tc_x,tc_xpe1,tc_xpe2);
+  "time_linear_combi",Time(time_0);
 
   lin_com:=AssociativeArray();
   for s_1 in [0..l] do
@@ -580,6 +581,7 @@ function lincom_xe1e2(lincom_e1e2,lv4tnp,l,max_coff_x,tc_e1,tc_e2,tc_e1pe2,tc_x,
       end for;
     end for;
   end for;
+
   return lin_com;
 end function;
 

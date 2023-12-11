@@ -1,6 +1,5 @@
 //calculate time of l-isogeny of dim2.
 
-
 //calculate time of l-isogeny of the point with order N. 
 procedure compute_isogeny(p,l)
   assert(IsPrime(l));
@@ -87,11 +86,6 @@ p:=82679173641844692464441510527096027092892765972977640017986144233606222283345
 
 //----------------------
 
-for l in {...} do
-  l;
-  compute_isogeny(p,l);
-end for;
-
 
 /*
 実装結果の見方について.
@@ -99,5 +93,13 @@ end for;
 1.time_null_point.     :codomainのtheta null pointを計算するのにかかった時間(秒).
 
 4.time_non_null_point. :null pointでない元xの像を計算するのにかかった時間(秒).
+
+上の時間4は次の2つの時間の合計になっています.
+
+2.time_for_all_pts.    :xに依存しない計算にかかった時間(秒).i.e. 0でないx_1,x_2,...に対して, ここの計算は一度だけすれば十分です.
+
+3.time_for_the_point   :xに依存する計算にかかった時間(秒)
+
+先日送ったpdfのtableにおいて, null ptは上の時間1, not-null ptは時間3を意味しています.
 */
 

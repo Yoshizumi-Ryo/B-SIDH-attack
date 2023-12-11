@@ -1,5 +1,13 @@
 //calculate time of l-isogeny of dim2.
 
+load "setting.m";  
+load "func_additions.m";
+load "func_isogeny.m";
+load "func_elliptic_theta.m";
+load "func_theta_trans.m";
+load "func_torsion_attack.m";
+
+
 //calculate time of l-isogeny of the point with order N. 
 procedure compute_isogeny(p,l)
   assert(IsPrime(l));
@@ -9,7 +17,7 @@ procedure compute_isogeny(p,l)
   E_0:=EllipticCurve(x^3-x);
 
   N:=1;
-  for NN in {1..15} do
+  for NN in {1..10} do
     if IsPrime(NN) then
       if NN ne l then
         N:=N*NN;
@@ -21,10 +29,10 @@ procedure compute_isogeny(p,l)
   E_0_4:=EllipticCurve(x^3-x);
 
 
-  "CI1";
-  N;
+  //"CI1";
+  //N;
   P,Q:=ell_to_torsion_basis_2(E_0_4,N);
-  "CI2";
+  //"CI2";
 
 
   lmd_0,lv22tnp_0,lv4tnp_0,E_0_4,j_0,isss_0:=E_to_lmd(E_0_4);
@@ -50,7 +58,7 @@ procedure compute_isogeny(p,l)
   lv4tc_xpe1:=ell_prod_lv4tc(lv4tc_PpS1,lv4tc_QpS1); //x+e1=(P+S1,Q+S1).
   lv4tc_xpe2:=ell_prod_lv4tc(lv4tc_PpS2,lv4tc_QpS2); //x+e2=(P+S2,Q+S2).
 
-  "CI3";
+  //"CI3";
   //---------------------------
   time_nullpt:=Time();
   Mat_F:=const_Mat_F(l);
@@ -86,6 +94,23 @@ p:=82679173641844692464441510527096027092892765972977640017986144233606222283345
 
 //----------------------
 
+for l in {3..50} do
+  if IsPrime(l) then
+    assert(IsDivisibleBy(p+1,l) or IsDivisibleBy(p-1,l));
+    l;
+    compute_isogeny(p,l);
+    "";
+  end if;
+end for;
+
+
+
+
+
+
+
+
+//---------------
 
 /*
 実装結果の見方について.

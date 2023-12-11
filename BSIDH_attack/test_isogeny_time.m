@@ -1,25 +1,6 @@
 //calculate time of l-isogeny of dim2.
 
 
-//construct Appropriate p for l.
-function get_p_l(min_p,max_p,l)
-  for p in {min_p..max_p} do
-    if IsPrime(p) and (p mod 4 eq 3) then
-      facset_p:=Seqset(fatoriztion_seq(p+1));
-      facset_m:=Seqset(fatoriztion_seq(p-1));
-      if l in facset_p then
-        return p;
-      elif l in facset_m then
-        return p;
-      end if;
-    end if;
-  end for;
-  return "Nothing.";
-end function;
-
-
-
-
 //calculate time of l-isogeny of the point with order N. 
 procedure compute_isogeny(p,l)
   assert(IsPrime(l));
@@ -106,44 +87,10 @@ p:=82679173641844692464441510527096027092892765972977640017986144233606222283345
 
 //----------------------
 
-
-for l in {3..50} do
-  if IsPrime(l) then
-    l;
-    compute_isogeny(p,l);
-    "";
-  end if;
+for l in {...} do
+  l;
+  compute_isogeny(p,l);
 end for;
-
-
-for l in {3..100} do
-  if IsPrime(l) then
-    Mat_F:=const_Mat_F(l);
-    if (l mod 4) eq 1 then
-      r:=2;
-    else
-      r:=4;
-    end if;
-    l;
-    Max({Mat_F[j][1]: j in {1..r}});
-    "";
-  end if;
-end for;
-
-
-
-
-
-
-
-min_p:=10^5; //pの最小値. 
-max_p:=10^6; //pの最大値. 
-l:=11;    //計算したい次数l. 
- 
-//min_p以上1max_p以下の素数p(mod 4=3)でl|(p+1) or l|(p-1)となる最小のものを返します.
-p:=get_p_l(min_p,max_p,l);  //100343 
-
-compute_isogeny(p,l);
 
 
 /*
@@ -152,13 +99,5 @@ compute_isogeny(p,l);
 1.time_null_point.     :codomainのtheta null pointを計算するのにかかった時間(秒).
 
 4.time_non_null_point. :null pointでない元xの像を計算するのにかかった時間(秒).
-
-上の時間4は次の2つの時間の合計になっています.
-
-2.time_for_all_pts.    :xに依存しない計算にかかった時間(秒).i.e. 0でないx_1,x_2,...に対して, ここの計算は一度だけすれば十分です.
-
-3.time_for_the_point   :xに依存する計算にかかった時間(秒)
-
-先日送ったpdfのtableにおいて, null ptは上の時間1, not-null ptは時間3を意味しています.
 */
 

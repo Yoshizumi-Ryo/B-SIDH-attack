@@ -343,22 +343,22 @@ function modify_basis(lv4tnp,l,lv4tc1,lv4tc2,lv4tc1p2)
   lm_j_lpow:=[];
 
   for i_0 in lv4keys do
-    if (mult(lv4tnp,l_d+1,lv4tc1)[i_0] ne 0) then
-      lm_j_lpow[1]:=mult(lv4tnp,l_d,inv_lv4tc1)[i_0]/mult(lv4tnp,l_d+1,lv4tc1)[i_0];
+    if (mult3(lv4tnp,l_d+1,lv4tc1)[i_0] ne 0) then
+      lm_j_lpow[1]:=mult3(lv4tnp,l_d,inv_lv4tc1)[i_0]/mult3(lv4tnp,l_d+1,lv4tc1)[i_0];
       break i_0;
     end if;
   end for;
 
   for i_0 in lv4keys do
-    if (mult(lv4tnp,l_d+1,lv4tc2)[i_0] ne 0) then
-      lm_j_lpow[2]:=mult(lv4tnp,l_d,inv_lv4tc2)[i_0]/mult(lv4tnp,l_d+1,lv4tc2)[i_0];
+    if (mult3(lv4tnp,l_d+1,lv4tc2)[i_0] ne 0) then
+      lm_j_lpow[2]:=mult3(lv4tnp,l_d,inv_lv4tc2)[i_0]/mult3(lv4tnp,l_d+1,lv4tc2)[i_0];
       break i_0;
     end if;
   end for;
 
   for i_0 in lv4keys do
-    if (mult(lv4tnp,l_d+1,lv4tc1p2)[i_0] ne 0) then
-      lm_j_lpow[3]:=mult(lv4tnp,l_d,inv_lv4tc1p2)[i_0]/mult(lv4tnp,l_d+1,lv4tc1p2)[i_0];
+    if (mult3(lv4tnp,l_d+1,lv4tc1p2)[i_0] ne 0) then
+      lm_j_lpow[3]:=mult3(lv4tnp,l_d,inv_lv4tc1p2)[i_0]/mult3(lv4tnp,l_d+1,lv4tc1p2)[i_0];
       break i_0;
     end if;
   end for;
@@ -394,17 +394,28 @@ end function;
 
 function lv4tnp_of_codomain(l,r,set_vec_t,index_j,lv4tnp,tc_e1,tc_e2,tc_e1pe2)
   tnp_codomain:=AssociativeArray();  //lv4tnp of codomain.
- 
+
+  time_1:=Time();   
   _,base_field:=global_field_of_seq([tc_e1,tc_e2,tc_e1pe2]);
+  "time_base_field.",Time(time_1);
+
+  time_2:=Time();   
   tc_e1,tc_e2,tc_e1pe2:=modify_basis(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2);
+  "time_modify_basis.",Time(time_2);
 
+  time_3:=Time();   
   lin_com:=linear_combination(lv4tnp,l,tc_e1,tc_e2,tc_e1pe2);
+  "time_linear_combination.",Time(time_3);   
 
-  
+  time_4:=Time();
   for key in lv4keys do
     tnp_codomain[key]:=&+[&*[lin_com[[t1[j],t2[j]]][index_j[key][j]]:j in {1..r}]:t1,t2 in set_vec_t];
     tnp_codomain[key]:=(base_field)!(tnp_codomain[key]);
   end for;
+  "time_isogeny.",Time(time_4);
+
+  assert(Is_lv4tnp(tnp_codomain));
+
   return tnp_codomain;
 end function;
 

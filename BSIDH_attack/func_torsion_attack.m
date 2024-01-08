@@ -160,7 +160,7 @@ function FullRepInt_2(C,p)
         t:=td;
         deg:=((xd^2+yd^2+p*(zd^2+td^2)) div 4);
         assert(deg eq C);
-        "we needed the for-roop in FullRepInt:",i,"times.";
+        //"we needed the for-roop in FullRepInt:",i,"times.";
         return [x,y,z,t]; //x+y*i+z*((i+j)/2)+t*((1+k)/2).
       end if;
     end if;
@@ -197,6 +197,7 @@ function times_FullRepInt_2(C,p,max_time)
   end for;
   return "we cannot find.";
 end function;
+
 
 
 
@@ -1050,7 +1051,162 @@ end function;
 
 
 
+/*
+//aux alpha:E_0_4->E_pr.
+function main_torsion_attack_3_another(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,zeta_8,l)
+  time_total:=Time();
+  time_prepare:=Time();
+  assert(N_A gt N_B);
+  assert(P_A in E_0_4);
+  assert(Q_A in E_0_4);
+  assert(PA_EB in E_B);
+  assert(QA_EB in E_B);
+  assert(alpha_P_A in E_pr);
+  assert(alpha_Q_A in E_pr);
+  lmd_0,lv22tnp_0,lv4tnp_0,E_0_4,j_0,isss_0:=E_to_lmd(E_0_4);
+  //"wait for chaing elliptic curve to another isomorphic one."; 
+  time_ell_change:=Time();
+  lmd_B,lv22tnp_B,lv4tnp_B,E_B2,j_B,isss_B,iso_E_B_2:=E_to_lmd(E_B);
+  lmd_pr,lv22tnp_pr,lv4tnp_pr,E_pr,j_pr,isss_pr,iso_E_pr:=E_to_lmd(E_pr);
+  //"fin.",Time(time_ell_change);
+  assert(isss_0);
+  assert(isss_B);
+  assert(isss_pr);
 
+  //(N_A,N_A)-isogeny F:E_cd*E_B->E_0*E'_B.
+  //basis_KerF:={[alpha(P_A),PA_EB],[alpha(Q_A),QA_EB]}; //in E_cd*E_B.
+  //we will call e_1=[alpha(P_A),PA_EB], e_2=[alpha(Q_A),QA_EB].
+  //Next we want to calculate  F(0,PA_EB)=(S_1,*), F(0,QA_EB)=(S_2,*), because Ker(phi_B)=<S_1,S_2>.
+
+  //"wait for taking basis of E_B_2[N_B].";
+  S1,S2:=ell_to_torsion_basis_2(E_B2,N_B); //attacker will use.
+  //"fin.";
+  //theta null pt of E_0*E_B.----------------
+  lv4tnp_0B:=ell_prod_lv4tc(lv4tnp_pr,lv4tnp_B); 
+  assert(Is_lv4tnp(lv4tnp_0B));
+  lv22tnp_0B:=lv4tc_to_lv22tc(lv4tnp_0B);
+  assert(Is_prod_ell(lv22tnp_0B));
+  //basis of Ker(F) is f_1,f_2 in E_0*E_B.
+  //f_1 in E_0*E_B.
+  f1_E0:=iso_E_pr(alpha_P_A);     //in E_0.
+  f1_EB:=iso_E_B_2(PA_EB);    //in E_B2.
+  lv4tc_f1_E0:=uvw_to_lv4tc(lmd_pr,lv22tnp_pr,f1_E0[1],f1_E0[2],f1_E0[3]);
+  lv4tc_f1_EB:=uvw_to_lv4tc(lmd_B,lv22tnp_B,f1_EB[1],f1_EB[2],f1_EB[3]);
+  lv4tc_f1:=ell_prod_lv4tc(lv4tc_f1_E0,lv4tc_f1_EB);
+  //assert(IsOrder(lv4tnp_0B,lv4tc_f1,N_A));
+
+  //f_2 in E_0*E_B.
+  f2_E0:=iso_E_pr(alpha_Q_A);     //in E_0.
+  f2_EB:=iso_E_B_2(QA_EB);    //in E_B2.
+  lv4tc_f2_E0:=uvw_to_lv4tc(lmd_pr,lv22tnp_pr,f2_E0[1],f2_E0[2],f2_E0[3]);
+  lv4tc_f2_EB:=uvw_to_lv4tc(lmd_B,lv22tnp_B,f2_EB[1],f2_EB[2],f2_EB[3]);
+  lv4tc_f2:=ell_prod_lv4tc(lv4tc_f2_E0,lv4tc_f2_EB);
+  //assert(IsOrder(lv4tnp_0B,lv4tc_f2,N_A));
+
+  //f_1+f_2 in E_0*E_B.
+  f12_E0:=f1_E0+f2_E0;
+  f12_EB:=f1_EB+f2_EB;
+  lv4tc_f12_E0:=uvw_to_lv4tc(lmd_pr,lv22tnp_pr,f12_E0[1],f12_E0[2],f12_E0[3]);
+  lv4tc_f12_EB:=uvw_to_lv4tc(lmd_B,lv22tnp_B,f12_EB[1],f12_EB[2],f12_EB[3]);
+  lv4tc_f12:=ell_prod_lv4tc(lv4tc_f12_E0,lv4tc_f12_EB);
+  //assert(IsOrder(lv4tnp_0B,lv4tc_f12,N_A));
+  //linear combinataion of f_1,f_2.
+
+  //----------------------------------------------
+  //S1,S2 is a basis of E_B[N_B].   
+  //consider (0,S1),(0,S2) in E_0*E_B.
+  //we need these images.
+  //construct (0,S_1), (0,S_1)+f_1, (0,S_1)+f_2.
+  //"MT9";
+  lv4tc_0S1,lv4tc_0S1pf1,lv4tc_0S1pf2,tc_0S1_lincomf1f2:=
+  const_trp_x(lmd_pr,E_pr,lmd_B,E_B,lv4tnp_pr,lv22tnp_B,lv4tnp_0B,f1_E0,f1_EB,f2_E0,f2_EB,lv4tc_f1_E0,lv4tc_f2_E0,lv4tc_f1,lv4tc_f2,lv4tc_f12,S1);
+  //assert(IsOrder(lv4tnp_0B,lv4tc_0S1,N_B));
+
+  //construct (0,S_2), (0,S_2)+f_1, (0,S_2)+f_2.
+  lv4tc_0S2,lv4tc_0S2pf1,lv4tc_0S2pf2,tc_0S2_lincomf1f2:=
+  const_trp_x(lmd_pr,E_pr,lmd_B,E_B,lv4tnp_pr,lv22tnp_B,lv4tnp_0B,f1_E0,f1_EB,f2_E0,f2_EB,lv4tc_f1_E0,lv4tc_f2_E0,lv4tc_f1,lv4tc_f2,lv4tc_f12,S2);
+  //assert(IsOrder(lv4tnp_0B,lv4tc_0S2,N_B));
+  //"MT10";
+  //------------------
+  lv4tnp_cd:=lv4tnp_0B;
+
+  lv4tc_f1_cd:=lv4tc_f1;
+  lv4tc_f2_cd:=lv4tc_f2;
+  lv4tc_f12_cd:=lv4tc_f12;
+
+  lv4tc_0S1_cd:=lv4tc_0S1;
+  lv4tc_0S1pf1_cd:=lv4tc_0S1pf1;
+  lv4tc_0S1pf2_cd:=lv4tc_0S1pf2;
+
+  lv4tc_0S2_cd:=lv4tc_0S2;
+  lv4tc_0S2pf1_cd:=lv4tc_0S2pf1;
+  lv4tc_0S2pf2_cd:=lv4tc_0S2pf2;
+
+  //"prepare time",Time(time_prepare);
+  //=========================================
+
+  //"start attack isogeny-------------------------";
+  fac:=decomposition_to_seq(N_A); //the order of composition.
+  //fac;
+  s:=1;
+
+  for i in {1..#fac} do
+    //"";
+    time_domain:=Time();
+    kk:=IntegerRing()!(N_A/(s*l));
+
+    //"we calculated degree.", cut_out_first(fac,(i-1));
+    //"from now, we calculate degree l=",l;
+    //"we remain degree.", cut_out_last(fac,(#fac-i));
+
+    assert(s*l*kk eq N_A);
+    //"l(mod 4)=",(l mod 4);
+
+    lv4tnp_dm:=lv4tnp_cd;
+    lv4tc_f1_dm:=lv4tc_f1_cd;
+    lv4tc_f2_dm:=lv4tc_f2_cd;
+    lv4tc_f12_dm:=lv4tc_f12_cd;
+
+    //"wait for calculate on the domain.";
+    time_A:=Time();
+    //"MT15";
+    lincom_f1f2_dm:=AssociativeArray();
+    lincom_f1f2_dm[[1,1]]:=lv4tc_f12_dm;
+    //"MT15.1";
+    lincom_f1f2_dm[[kk,0]]:=mult2(lv4tnp_dm,kk,lv4tc_f1_dm);
+
+    
+    lincom_f1f2_dm[[0,kk]]:=mult2(lv4tnp_dm,kk,lv4tc_f2_dm);
+  
+    lincom_f1f2_dm[[kk,kk]]:=mult2(lv4tnp_dm,kk,lv4tc_f12_dm);
+   
+
+    lv4tc_e1 :=lincom_f1f2_dm[[kk,0]];
+    lv4tc_e2 :=lincom_f1f2_dm[[0,kk]];
+    lv4tc_e12:=lincom_f1f2_dm[[kk,kk]];
+
+    "l=",l;
+   
+    //"MT16.1";
+
+    //assert(IsOrder(lv4tnp_dm,lv4tc_e1,l));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_e2,l));
+    //assert(IsOrder(lv4tnp_dm,lv4tc_e12,l));
+
+    lv4tc_0S1_dm   :=lv4tc_0S1_cd;
+    lv4tc_0S1pf1_dm:=lv4tc_0S1pf1_cd;
+    lv4tc_0S1pf2_dm:=lv4tc_0S1pf2_cd;
+    lv4tc_0S2_dm   :=lv4tc_0S2_cd;
+    lv4tc_0S2pf1_dm:=lv4tc_0S2pf1_cd;
+    lv4tc_0S2pf2_dm:=lv4tc_0S2pf2_cd;
+
+    
+   //-----------------------
+
+    return lv4tnp_0B,lv4tc_e1,lv4tc_e2,lv4tc_e12,lv4tc_0S1_dm,ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f1_dm,lv4tc_0S1_dm,lv4tc_0S1pf1_dm),ThreePtLadder_plus(lv4tnp_dm,kk,lv4tc_f2_dm,lv4tc_0S1_dm,lv4tc_0S1pf2_dm),l;
+  end for;
+end function;
+*/
 
 
 //end of torsion_attak6.m

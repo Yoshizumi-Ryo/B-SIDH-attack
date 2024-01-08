@@ -74,6 +74,8 @@ end function;
 
 
 
+
+
 function to_splitting_theta(lv4tnp,lv4tc_1,lv4tc_2,zeta_8)
   //construct matrix moving 0-valued pt to [1,1,1,1].
   TP:=AssociativeArray();
@@ -124,6 +126,13 @@ function to_splitting_theta(lv4tnp,lv4tc_1,lv4tc_2,zeta_8)
     return to_lv4(tt_lv22tnp),to_lv4(tt_lv22tc_1),to_lv4(tt_lv22tc_2);
    end if;
 end function;
+
+
+
+
+
+
+
 
 
 //End of func_theta_trans.m

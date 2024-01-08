@@ -100,7 +100,7 @@ end function;
 
 
 //check about [LR12] Theorem 3.2.
-function modify_xpy(alxpy,alxmy,al0,alx,aly) 
+function _xpy(alxpy,alxmy,al0,alx,aly) 
   cr:=Random(CartesianProduct(set_chi,sub_RP_i));
   //(i,j,k,l;m) is Riemann position.
   chi:=cr[1];
@@ -197,7 +197,7 @@ function calc_uxpy_3(u0,ux,uy,uxmy,zetas)
     ind_2:=precomp_for_add_3[zetas][etaa][2]; 
     ind_3:=precomp_for_add_3[zetas][etaa][3]; 
     ind_4:=precomp_for_add_3[zetas][etaa][4]; 
-    coff :=precomp_for_add_3[zetas][etaa][5];     
+    coff :=precomp_for_add_3[zetas][etaa][5];   
     sum+:=(coff*uy[ind_1]*uy[ind_2]*ux[ind_3]*ux[ind_4]);
   end for;
   return sum/(16*uxmy[zetas[2]]*u0[zetas[3]]*u0[zetas[4]]);
@@ -211,10 +211,14 @@ end function;
 
 //different addition.
 function add(alnp,alx,aly,alxmy)
+  time_0:=Time();
   u0:=u_of_ac(alnp);
   ux:=u_of_ac(alx);
   uy:=u_of_ac(aly);
   uxmy:=u_of_ac(alxmy);
+  //"time_calc_u";Time(time_0);
+
+  time_1:=Time();
   uxpy:=AssociativeArray();
   for zeta1 in set_zeta do
     for zetas in RP_zetas do
@@ -233,25 +237,23 @@ function add(alnp,alx,aly,alxmy)
           end if;
           assert(u0[zetas[3]] ne 0);  
           assert(u0[zetas[4]] ne 0);
+
+          time_2:=Time();
           uxpy[zeta1]:=sign_jacob[zeta1]*calc_uxpy_3(u0,ux,uy,uxmy,zetas);
+          //"time_main.",Time(time_2);
+
           break zetas;
         end if;
       end if;
     end for;
   end for;
+  //"time_ramain.",Time(time_1);
+
+
   assert(Keys(uxpy) eq set_zeta);
   alxpy:=u_to_ac(uxpy);
   return alxpy;
 end function;
-
-
-
-
-
-
-
-
-
 
 
 
@@ -366,6 +368,28 @@ function mult(alnp,k,alx)
 end function;
 
 
+
+//calculate k-mult.
+function simple_mult(alnp,k,alx)
+  assert (k ge 0);
+  if (k eq 0) then  //k=0.
+    return alnp;
+  elif (k eq 1) then  //k=1.
+    return alx;
+  else   //k>=2.
+    tm1_x:=alx;
+    tm2_x:=alnp;
+    for t in [2..k] do
+      tx:=add(alnp,alx,tm1_x,tm2_x);  //tx
+      tm2_x:=tm1_x;  //(t-2)x
+      tm1_x:=tx;  //(t-1)x
+    end for;
+    return tx;
+  end if;
+end function;
+
+
+
 function double(alnp,alx)
   return add(alnp,alx,alx,alnp);
 end function;
@@ -373,6 +397,13 @@ end function;
 
 
 function mult2(alnp,k,alx)
+  if k eq 0 then
+    return alnp;
+  elif k eq 1 then
+    return alx;
+  elif k eq 2 then
+    return add(alnp,alx,alx,alnp);
+  end if;
   bit_k:=IntegerToSequence(k,2);
   x:=alx;
   y:=double(alnp,alx);
@@ -394,6 +425,46 @@ function mult2(alnp,k,alx)
   end for;
   return x;
 end function;
+
+
+
+//Laddre for k>=2.
+function Ladder(alnp,k,alx)
+  bit_k:=IntegerToSequence(k,2);
+  x:=alx;
+  y:=double(alnp,alx);
+  xmy:=inverse_element(alx);
+  for i in [1..(#bit_k-1)] do
+    bit_i:=bit_k[#bit_k-i];  //上からj番目
+    if bit_i eq 1 then
+      x_0:=add(alnp,x,y,xmy);
+      y_0:=double(alnp,y);
+      x:=x_0;
+      y:=y_0;
+    end if;
+    if bit_i eq 0 then
+      x_0:=double(alnp,x);
+      y_0:=add(alnp,x,y,xmy);
+      x:=x_0;
+      y:=y_0;
+    end if;
+  end for;
+  return x;
+end function;
+
+
+//optimised multiplication.
+function opt_mult(alnp,k,alx)
+  assert(k ge 0);
+  if k le 4 then
+    return simple_mult(alnp,k,alx);
+  else 
+    return Ladder(alnp,k,alx);
+  end if;
+end function;
+
+
+
 
 
 
@@ -426,6 +497,24 @@ function ThreePtLadder_plus(alnp,k,alx,aly,alxpy)
   almy:=inverse_element(aly);
   return ThreePtLadder(alnp,(k-1),alx,alxpy,almy);
 end function;
+
+
+
+function mult3(alnp,k,alx)
+  assert(k ge 0);
+  if k eq 0 then
+    return alnp;
+  elif k eq 1 then
+    return alx;
+  elif k eq 2 then
+    return add(alnp,alx,alx,alnp);
+  else 
+    return ThreePtLadder(alnp,k,alx,alnp,alx);
+  end if;
+end function;
+
+
+
 
 
 
@@ -468,6 +557,21 @@ end function;
 
 
     
+function IsOrder3(lv4tnp,lv4tc,order)
+  if not(eq_tc(mult3(lv4tnp,order,lv4tc),lv4tnp)) then
+    return false;
+  end if;
+  fact:=Factorisation(order);
+  for i in {1..#fact} do
+    div_order:=order div fact[i][1];
+    if eq_tc(mult3(lv4tnp,div_order,lv4tc),lv4tnp) then
+      return false;
+    end if;
+  end for;
+  return true;
+end function;
+
+
    
 
 
@@ -531,7 +635,7 @@ end function;
 
 
 
-//使わない. 
+
 //give x+s_1*e_1+s_2*e_2 for s_1,s_2 
 //from e_1,e_2,e_1+e_2,x,x+e_1,x+e_2.
 function x_plus_lincom(tnp,l,e_1,e_2,e_1pe_2,x,xpe_1,xpe_2)

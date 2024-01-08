@@ -1,6 +1,8 @@
 //calculate time of l-isogeny of dim2.
 
 load "setting.m";  
+
+load "func_Mum_to_theta.m";
 load "func_additions.m";
 load "func_isogeny.m";
 load "func_elliptic_theta.m";
@@ -61,12 +63,14 @@ procedure compute_isogeny(p,l)
   //"CI3";
   //---------------------------
   time_nullpt:=Time();
+  time_nullpt_1:=Time();
   Mat_F:=const_Mat_F(l);
   r,set_vec_t,index_j:=const_index_t_j_3(l,Mat_F);
+  "time_precomp.",Time(time_nullpt_1);
 
-  lv4tc_e2,lv4tc_e2,lv4tc_e12:=modify_basis(lv4tnp_dm,l,lv4tc_e1,lv4tc_e2,lv4tc_e12);
-
+  time_nullpt_3:=Time();
   lv4tnp_cd:=lv4tnp_of_codomain(l,r,set_vec_t,index_j,lv4tnp_dm,lv4tc_e1,lv4tc_e2,lv4tc_e12);
+  "time_isogeny.";Time(time_nullpt_3);
   "1.time_null_point.",Time(time_nullpt);
   //---------------------------
   

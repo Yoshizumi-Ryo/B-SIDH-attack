@@ -3,6 +3,7 @@
 
 
 
+
 //We can apply this function any Ros form not only 0,1.
 function Ros_to_lv22tnp(Ros)
   lv22tnpsq:=AssociativeArray(); 
@@ -12,6 +13,7 @@ function Ros_to_lv22tnp(Ros)
   U:={1,3,5};
   for T in {{2,3,4,5},{4,5},{1,2},{3,4}} do
     XX:=((-1)^(#(T meet U)))*(&*[(Ros[i]-Ros[j]): i in ({} sdiff U), j in ({1..5} diff ({} sdiff U))])/(&*[(Ros[i]-Ros[j]): i in (T sdiff U), j in ({1..5} diff (T sdiff U))]);
+    _<x>:=PolynomialRing(Parent(XX));
     sq:=RootsInSplittingField(x^2-XX);
     lv22tnpsq[eta[T]]:=sq[1][1];
   end for;

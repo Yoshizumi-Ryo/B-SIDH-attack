@@ -100,7 +100,7 @@ E_pr,alpha_P_A,alpha_Q_A:=construct_auxiliary_img_6(E_0_4,N_A,N_B,P_A,Q_A);
 "construct_auxiliary_points_finish.";
 
 /*
-//if N_A-N_B is squre.
+//if N_A-N_B is square.
 a:=N_A-N_B;
 assert(IsSquare(a)); 
 b:=IntegerRing()!Sqrt(a);  
@@ -112,9 +112,10 @@ alpha_Q_A:=alpha_0(Q_A);
 //==============================================
 
 
+lv4tnp,lv4_e1,lv4_e2,lv4_e12:=
+main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A,zeta_8);
 
-
-
+/*
 
 //attack start===================================
 atk_gen:=main_torsion_attack_3(E_0_4,E_B,E_pr,N_A,N_B,P_A,Q_A,PA_EB,QA_EB,alpha_P_A,alpha_Q_A,precomp_for_N_A,zeta_8);

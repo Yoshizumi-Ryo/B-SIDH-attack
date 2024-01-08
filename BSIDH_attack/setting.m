@@ -192,6 +192,7 @@ end function;
 
 
 
+
 function to_lv4(tc)
   if Keys(tc) eq lv4keys then
     return tc;
@@ -289,6 +290,15 @@ function inverse_element(lv4tc)
 end function;
 
 
+procedure expand(Ass)
+  for key in Keys(Ass) do
+    key;
+    Ass[key];
+    "";
+  end for;
+end procedure;
+
+
 
 //-----------------------
 
@@ -307,6 +317,43 @@ function Is_prod_ell(tnp)
 end function;
 
 
+
+
+function Is_tehta_prod_ell(tnp)
+  if Keys(tnp) eq lv4keys then
+    tnp:=lv4tc_to_lv22tc(tnp);
+  end if;
+  if not Is_prod_ell(tnp) then
+    //"Not product of ellipitc curves as PPAV.";
+    return false;
+  elif tnp[[1,1,1,1]] ne 0 then
+    for key in even_lv22keys do
+      if tnp[key] eq 0 then
+        //"Not product of ellipitc curves as theta.";
+        return false,key;
+      end if;
+    end for;
+    assert(false);
+  elif tnp[[1,1,1,1]] eq 0 then
+    return true;
+  else
+    assert(false);
+  end if;
+end function;
+
+
+    
+
+  
+
+
+
+
+
+
+
+
+//-------------------
 
 function get_characteristic(tc)
   for key in Keys(tc) do

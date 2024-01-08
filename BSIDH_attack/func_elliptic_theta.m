@@ -82,6 +82,32 @@ end function;
 
 
 
+//return lmd s.t. y^2=x(x-1)(x-lm) is supersingular.
+function supersinular_Legendre(p)
+  assert(IsPrime(p));
+  assert(p ne 2);
+  hp:=IntegerRing()!((p-1)/2);
+  _<x>:=PolynomialRing(GF(p));
+  f:=&+[Binomial(hp,i)^2*x^i:i in [0..hp]];
+  sol,Fld:=RootsInSplittingField(f);
+  "base field.",Fld;
+  "the number of lmd.",#sol;
+  sol_set:={sol[i][1]:i in {1..#sol}};
+  iso_lmd_set:={};
+  for lmd in sol_set do
+    iso_lmd_set join:={{lmd,1/lmd,1-lmd,1/(1-lmd),1-(1/lmd),lmd/(lmd-1)}};
+  end for;
+  "the number of iso calss.",#iso_lmd_set;
+  return iso_lmd_set;
+end function;
+
+
+
+
+
+
+
+
 
 //For point--------------------------------
 
@@ -481,6 +507,7 @@ end function;
     
 
 
+
 //calculate cyclic isogeny.
 function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
   N:=Order(ker_gen);
@@ -488,7 +515,7 @@ function elliptic_isogeny_1ptker(E,ker_gen,P,Q)
   E_m:=E;
   p:=Characteristic(BaseField(E));
   _<t>:=PolynomialRing(GF(p^4));
-  "form now, we calculate ellitpic isogeny of deg=",fact;
+  //"form now, we calculate ellitpic isogeny of deg=",fact;
   for i in {1..#fact} do
     if i ne #fact then
       k:=&*[fact[j]: j in {(i+1)..#fact}];

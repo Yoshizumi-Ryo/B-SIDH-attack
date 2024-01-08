@@ -3,6 +3,7 @@
 ・B-SIDH attackをしたい場合.
 
 load_this.m をloadすると動きます. 
+load_this_new.mをloadすると動きます. (こちらがKummer).
 
 
 ・p,N_A,N_Bの具体例について.

@@ -2,9 +2,11 @@
 
 ・B-SIDH attackをしたい場合.
 
-load_this.m をloadすると動きます. 
+load_this.m をloadすると動きます. (こちらがアーベル多様体(遅い))
 
-load_this_new.mをloadすると動きます. (こちらがKummer).
+or
+
+load_this_new.mをloadすると動きます. (こちらがKummer(速い)).
 
 
 ・p,N_A,N_Bの具体例について.
